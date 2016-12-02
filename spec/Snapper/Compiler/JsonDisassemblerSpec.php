@@ -32,17 +32,17 @@ class JsonDisassemblerSpec extends ObjectBehavior
         ];
 
         $expected = [
-            "{\"foo\":",
-            100,
-            ",\"bars\":[",
-            200,
-            ",",
-            300,
-            "],\"a\":{\"b\":{\"c\":\"Lorem ipsum (id:",
-            400,
-            ") dolor a(id:",
-            200,
-            ")met\"}}}",
+            ["PART", "NONE", "{\"foo\":"],
+            ["ALIAS", "JSON", 100],
+            ["PART", "NONE", ",\"bars\":["],
+            ["ALIAS", "JSON", 200],
+            ["PART", "NONE", ","],
+            ["ALIAS", "JSON", 300],
+            ["PART", "NONE", "],\"a\":{\"b\":{\"c\":\"Lorem ipsum (id:"],
+            ["ALIAS", "JSON", 400],
+            ["PART", "NONE", ") dolor a(id:"],
+            ["ALIAS", "JSON", 200],
+            ["PART", "NONE", ")met\"}}}"],
         ];
 
         $this->disassemble($full, $tokens)->shouldBe($expected);
@@ -67,17 +67,17 @@ class JsonDisassemblerSpec extends ObjectBehavior
         ];
 
         $expected = [
-            "{\"foo\":",
-            "abc",
-            ",\"bars\":[",
-            "def",
-            ",",
-            "ghi",
-            "],\"a\":{\"b\":{\"c\":\"Lorem ipsum (id:",
-            "jkl",
-            ") dolor a(id:",
-            "def",
-            ")met\"}}}",
+            ["PART", "NONE", "{\"foo\":"],
+            ["ALIAS", "JSON", "abc"],
+            ["PART", "NONE", ",\"bars\":["],
+            ["ALIAS", "JSON", "def"],
+            ["PART", "NONE", ","],
+            ["ALIAS", "JSON", "ghi"],
+            ["PART", "NONE", "],\"a\":{\"b\":{\"c\":\"Lorem ipsum (id:"],
+            ["ALIAS", "NONE", "jkl"],
+            ["PART", "NONE", ") dolor a(id:"],
+            ["ALIAS", "NONE", "def"],
+            ["PART", "NONE", ")met\"}}}"],
         ];
 
         $this->disassemble($full, $tokens)->shouldBe($expected);

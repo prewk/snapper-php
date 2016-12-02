@@ -199,8 +199,10 @@ class MapField extends Field
                 $disassembled = $this->jsonDisassembler->disassemble($transformed, array_values($hashToUuid));
 
                 return [$this->name => new TaskAssembledAlias(array_map(function($part) use ($uuidToTaskId) {
-                    if (array_key_exists($part, $uuidToTaskId)) {
-                        return $uuidToTaskId[$part];
+                    list($type, $cast, $value) = $part;
+
+                    if ($type === "ALIAS" && array_key_exists($value, $uuidToTaskId)) {
+                        return [$type, $cast, $uuidToTaskId[$value]];
                     }
 
                     return $part;

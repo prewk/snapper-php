@@ -9,6 +9,7 @@ declare(strict_types = 1);
 
 namespace Prewk\Snapper\Compiler;
 
+use Prewk\Snapper\Errors\CompilerException;
 use Prewk\Snapper\Errors\ForbiddenOperationException;
 
 /**
@@ -24,12 +25,26 @@ class TaskAssembledAlias implements TaskValue
     /**
      * TaskAssembledAlias constructor
      *
-     * @param string[]|int[] $parts
+     * @param array $parts ["PART"|"ALIAS", "NONE"|"JSON", mixed]
+     * @throws CompilerException
      */
     public function __construct(
         array $parts
     )
     {
+        foreach ($parts as $tuple) {
+            if (count($tuple) !== 3) {
+                throw new CompilerException("TaskAssembledAlias parts must be a tuple of 3 entries");
+            }
+
+            list($type, $cast) = $tuple;
+
+            if (!in_array($type, ["PART", "ALIAS"])) {
+                throw new CompilerException("TaskAssembledAlias part tuple index 0 must be PART or ALIAS, found: $type");
+            } elseif (!in_array($cast, ["NONE", "JSON"])) {
+                throw new CompilerException("TaskAssembledAlias part tuple index 1 must be NONE or JSON, found: $cast");
+            }
+        }
         $this->parts = $parts;
     }
 

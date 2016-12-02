@@ -59,24 +59,46 @@ class JsonDisassembler
             $parts = Arr::flatten($wip);
         }
 
+        $metadata = [];
+
         // Remove quotation marks if tokens are strings
         for ($i = 0; $i < count($parts); $i++) {
             $part = $parts[$i];
 
-            if (
-                in_array($part, $tokens) && // If part is token
-                is_string($part) && // Token is a string
-                $i > 0 && // There exists a part before
-                $i < count($parts) - 1 && // There exists a part after
-                substr($parts[$i - 1], -1) === "\"" && // The part before ends with a "
-                $parts[$i + 1][0] === "\"" // The part after starts with a "
-            ) {
-                // Remove quotation marks
-                $parts[$i - 1] = substr($parts[$i - 1], 0, -1);
-                $parts[$i + 1] = substr($parts[$i + 1], 1);
+            if (in_array($part, $tokens)) {
+                if (
+                    is_string($part) && // Token is a string
+                    $i > 0 && // There exists a part before
+                    $i < count($parts) - 1 && // There exists a part after
+                    substr($parts[$i - 1], -1) === "\"" && // The part before ends with a "
+                    $parts[$i + 1][0] === "\"" // The part after starts with a "
+                ) {
+                    // Remove quotation marks
+                    $parts[$i - 1] = substr($parts[$i - 1], 0, -1);
+                    $parts[$i + 1] = substr($parts[$i + 1], 1);
+
+                    $metadata[] = ["ALIAS", "JSON"];
+                } elseif (is_string($part)) {
+                    $metadata[] = ["ALIAS", "NONE"];
+                } else {
+                    $metadata[] = ["ALIAS", "JSON"];
+                }
+            } else {
+                $metadata[] = ["PART", "NONE"];
             }
         }
 
-        return $parts;
+        $index = 0;
+        $partsWithMetadata = array_map(function($part) use ($metadata, &$index) {
+            $tuple = [$metadata[$index][0], $metadata[$index][1], $part];
+
+            $index++;
+
+            return $tuple;
+        }, $parts);
+
+//        print_r($partsWithMetadata);
+
+        return $partsWithMetadata;
     }
 }
