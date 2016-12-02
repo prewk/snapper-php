@@ -156,7 +156,7 @@ class Compiler
                 }
 
                 // The original CreateTask should be an UpdateTask instead
-                $updateTasks[] = $createTask->toUpdateTask($problematicColumns);
+                $updateTasks[] = $createTask->toUpdateTask($entitySchema, $problematicColumns);
 
                 // Re-create the CreateTask with fewer deps
                 $createTask = $this->makeCreateTask($idMaker, $entitySchema, $entityRow, $problematicFields);

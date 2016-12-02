@@ -92,15 +92,21 @@ class TaskAssembledAlias implements TaskValue
     public function getAsValue(array $aliasLookup)
     {
         return implode("", array_map(function($part) use ($aliasLookup) {
-            if (is_int($part)) {
-                if (!array_key_exists($part, $aliasLookup)) {
-                    throw new ForbiddenOperationException("Needed missing value for alias {$part}");
-                }
+            list($type, $cast, $value) = $part;
+            switch ($type) {
+                case "PART":
+                    return $value;
+                case "ALIAS":
+                    if (!array_key_exists($value, $aliasLookup)) {
+                        throw new ForbiddenOperationException("Needed missing value for alias {$part}");
+                    }
 
-                // TODO: Cast type should be part of the schema
-                return json_encode($aliasLookup[$part]);
-            } else {
-                return $part;
+                    switch ($cast) {
+                        case "JSON":
+                            return json_encode($aliasLookup[$value]);
+                        case "NONE":
+                            return $aliasLookup[$value];
+                    }
             }
         }, $this->parts));
     }

@@ -76,7 +76,7 @@ class TaskSequence implements Arrayable, Countable
                     return self::makeNode($value);
                 }, $data["values"]));
             case "UPDATE_TASK":
-                return new UpdateTask($data["entity"], $data["alias"], $data["columns"], array_map(function(array $value) {
+                return new UpdateTask($data["entity"], $data["alias"], $data["keyName"], $data["columns"], array_map(function(array $value) {
                     return self::makeNode($value);
                 }, $data["values"]));
             case "TASK_RAW_VALUE":
@@ -165,7 +165,7 @@ class TaskSequence implements Arrayable, Countable
                     throw new ForbiddenOperationException("Needed missing value for alias {$task->getId()}");
                 }
 
-                $updater($task->getEntity(), $aliasLookup[$task->getId()], $task->getColumns(), array_map(function(TaskValue $value) use (&$aliasLookup) {
+                $updater($task->getEntity(), $task->getKeyName(), $aliasLookup[$task->getId()], $task->getColumns(), array_map(function(TaskValue $value) use (&$aliasLookup) {
                     return $value->getAsValue($aliasLookup);
                 }, $task->getValues()));
             }

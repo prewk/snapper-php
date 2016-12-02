@@ -9,6 +9,7 @@ declare(strict_types = 1);
 
 namespace Prewk\Snapper\Compiler;
 use Prewk\Snapper\Errors\CompilerException;
+use Prewk\Snapper\Schema\Entity;
 
 /**
  * CreateTask
@@ -40,10 +41,11 @@ class CreateTask extends Task
     /**
      * Create an UpdateTask from this CreateTask
      *
+     * @param Entity $entitySchema
      * @param array $problematicColumns
      * @return UpdateTask
      */
-    public function toUpdateTask(array $problematicColumns): UpdateTask
+    public function toUpdateTask(Entity $entitySchema, array $problematicColumns): UpdateTask
     {
         $updateColumns = [];
         $updateValues = [];
@@ -55,7 +57,7 @@ class CreateTask extends Task
             }
         }
 
-        return new UpdateTask($this->entity, $this->id, $updateColumns, $updateValues);
+        return new UpdateTask($this->entity, $this->id, $entitySchema->getKey()->getName(), $updateColumns, $updateValues);
     }
     
     /**
