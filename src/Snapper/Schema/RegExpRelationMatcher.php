@@ -95,7 +95,6 @@ class RegExpRelationMatcher implements Arrayable, Objectable
                 return is_numeric($value) ? intval($value) : $value;
             default:
                 return $value;
-                break;
         }
     }
 
@@ -107,7 +106,7 @@ class RegExpRelationMatcher implements Arrayable, Objectable
      * @param string $subject
      * @return MapDependencyCollection
      */
-    public function getDependencies(MapDependencyCollection $collection, string $basePath, string $subject, int $baseOffset): MapDependencyCollection
+    public function getDependencies(MapDependencyCollection $collection, string $basePath, string $subject): MapDependencyCollection
     {
         preg_match_all($this->expression, $subject, $matches, PREG_OFFSET_CAPTURE);
 
@@ -121,8 +120,8 @@ class RegExpRelationMatcher implements Arrayable, Objectable
                         $this->relations[$index],
                         $basePath,
                         true,
-                        $baseOffset + $offset,
-                        $baseOffset + $offset + strlen($value)
+                        $offset,
+                        $offset + strlen($value)
                     );
                 }
             }

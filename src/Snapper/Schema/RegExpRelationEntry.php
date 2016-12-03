@@ -67,9 +67,8 @@ class RegExpRelationEntry extends MapEntry
     {
         foreach ($this->path->query($map, $dotMap) as $path => $value) {
             if (is_string($value)) {
-                // TODO: Hur i helvete räkna ut $baseOffset?
                 foreach ($this->matchers as $matcher) {
-                    $collection = $matcher->getDependencies($collection, $path, $value, 0);
+                    $collection = $matcher->getDependencies($collection, $path, $value);
                 }
             }
         }
