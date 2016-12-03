@@ -9,10 +9,12 @@ declare(strict_types = 1);
 
 namespace Prewk\Snapper\Schema;
 use Closure;
+use Illuminate\Contracts\Support\MessageBag;
 use Prewk\Snapper\Compiler\IdMaker;
 use Prewk\Snapper\Compiler\TaskRawValue;
 use Prewk\Snapper\Errors\InvalidTypeException;
 use Prewk\Snapper\Errors\SchemaException;
+use Prewk\Snapper\Snapshot;
 use stdClass;
 
 /**
@@ -90,6 +92,21 @@ class MatchField extends Field
         }
 
         return $this->default;
+    }
+
+    /**
+     * Validate the given value against the schema
+     *
+     * @param MessageBag $errors
+     * @param array $fields
+     * @param Snapshot $entities
+     * @return MessageBag
+     */
+    public function validate(MessageBag $errors, array $fields, Snapshot $entities): MessageBag
+    {
+        $field = $this->resolve($fields);
+
+        return $field->validate($errors, $fields, $entities);
     }
 
     /**
