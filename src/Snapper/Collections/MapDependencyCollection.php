@@ -138,7 +138,7 @@ class MapDependencyCollection
                 if ($diff !== 0 && $depCount > $i + 1) {
                     // Iterate through all in-string dependencies after this one and adjust their offset
                     for ($r = $i + 1; $r < $depCount; $r++) {
-                        if ($this->dependencies[$r]->isInString()) {
+                        if ($this->dependencies[$r]->isInString() && $this->dependencies[$r]->getPath() === $path) {
                             $this->dependencies[$r]->adjustOffset($diff, $startPos);
                         }
                     }

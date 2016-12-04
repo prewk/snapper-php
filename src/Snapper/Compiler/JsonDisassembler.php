@@ -16,7 +16,7 @@ use Illuminate\Support\Arr;
 class JsonDisassembler
 {
     /**
-     * Disassemble a string into 
+     * Disassemble a string into parts
      * 
      * @param array $full
      * @param array $tokens
