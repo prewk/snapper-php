@@ -127,7 +127,7 @@ class ValueField extends Field
     public function compile(IdMaker $idMaker, array $fields, bool $forceCircularFallback = false): array
     {
         if ($forceCircularFallback) {
-            return [$this->name = new TaskRawValue($this->circularFallback)];
+            return [$this->name => new TaskRawValue($this->circularFallback)];
         }
 
         return [$this->name => new TaskRawValue($this->getValue($fields))];

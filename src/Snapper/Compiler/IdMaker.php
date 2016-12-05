@@ -8,6 +8,7 @@
 declare(strict_types = 1);
 
 namespace Prewk\Snapper\Compiler;
+
 use Prewk\Snapper\Errors\CompilerException;
 
 /**

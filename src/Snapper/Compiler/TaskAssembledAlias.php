@@ -65,9 +65,11 @@ class TaskAssembledAlias implements TaskValue
      */
     public function getDependencies(): array
     {
-        return array_filter($this->parts, function($part) {
-            return is_int($part);
-        });
+        return array_map(function(array $tuple) {
+            return $tuple[2];
+        }, array_filter($this->parts, function(array $tuple) {
+            return $tuple[0] === "ALIAS";
+        }));
     }
 
     /**

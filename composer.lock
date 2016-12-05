@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "e8eff7aee11fd37b8556b01c824ed336",
-    "content-hash": "56a711b82d764168ec0254c4104e689b",
+    "hash": "006e927e26f3346cd25577b92ff5bd09",
+    "content-hash": "b130ee9d486398f98e8d554f49e06897",
     "packages": [
         {
             "name": "doctrine/inflector",
@@ -289,16 +289,16 @@
         },
         {
             "name": "prewk/snapper-schema",
-            "version": "v1.4.1",
+            "version": "v1.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/prewk/snapper-schema.git",
-                "reference": "1e9357d3dfa1579a56d516f636ba664b4b24babf"
+                "reference": "e6e6d022660b37fe8f6afddbdb7966a8ff20cc6d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/prewk/snapper-schema/zipball/1e9357d3dfa1579a56d516f636ba664b4b24babf",
-                "reference": "1e9357d3dfa1579a56d516f636ba664b4b24babf",
+                "url": "https://api.github.com/repos/prewk/snapper-schema/zipball/e6e6d022660b37fe8f6afddbdb7966a8ff20cc6d",
+                "reference": "e6e6d022660b37fe8f6afddbdb7966a8ff20cc6d",
                 "shasum": ""
             },
             "require-dev": {
@@ -322,7 +322,7 @@
                 }
             ],
             "description": "Snapper library's master schema",
-            "time": "2016-12-02 20:19:56"
+            "time": "2016-12-05 07:21:27"
         }
     ],
     "packages-dev": [

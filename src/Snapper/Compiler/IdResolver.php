@@ -72,6 +72,8 @@ class IdResolver
     }
 
     /**
+     * Find circular dependencies
+     * 
      * @param int $id
      * @param int[] $deps
      * @return array

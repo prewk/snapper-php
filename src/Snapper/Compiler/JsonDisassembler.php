@@ -97,8 +97,6 @@ class JsonDisassembler
             return $tuple;
         }, $parts);
 
-//        print_r($partsWithMetadata);
-
         return $partsWithMetadata;
     }
 }
