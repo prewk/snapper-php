@@ -48,6 +48,24 @@ class JsonDisassemblerSpec extends ObjectBehavior
         $this->disassemble($full, $tokens)->shouldBe($expected);
     }
 
+    function it_should_encode_slashes_correctly()
+    {
+        $full = [
+            "text" => '<a href="#100">test</a>',
+        ];
+        $tokens = [
+            100,
+        ];
+
+        $expected = [
+            ["PART", "NONE", "{\"text\":\"<a href=\\\"#"],
+            ["ALIAS", "JSON", 100],
+            ["PART", "NONE", "\\\">test</a>\"}"],
+        ];
+
+        $this->disassemble($full, $tokens)->shouldBe($expected);
+    }
+
     function it_should_disassemble_strings_without_quotation_marks()
     {
         $full = [

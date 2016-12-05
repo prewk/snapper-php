@@ -178,9 +178,6 @@ class Compiler
         $sequence = array_merge($createTasks, $updateTasks);
 
         if (count($createTasks) !== count($entities)) {
-            foreach ($createTasks as $createTask) {
-            }
-            print_r($idMaker->getBooks());
             throw new CompilerException("Snapshot uncompilable - can't resolve all dependency trees");
         }
 

@@ -24,7 +24,7 @@ class JsonDisassembler
      */
     public function disassemble(array $full, array $tokens): array
     {
-        $parts = [json_encode($full)];
+        $parts = [json_encode($full, JSON_UNESCAPED_SLASHES)];
 
         // Iterate through tokens
         foreach ($tokens as $token) {
