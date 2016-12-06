@@ -125,6 +125,28 @@ class Snapshot implements Countable, Arrayable
     }
 
     /**
+     * Filter a snapshot immutably
+     * 
+     * @param Closure $filterer
+     * @return Snapshot
+     */
+    public function filter(Closure $filterer): Snapshot
+    {
+        return new static(array_filter($this->entityRows, $filterer));
+    }
+
+    /**
+     * Concat another snapshot into this one
+     * 
+     * @param Snapshot $concatee
+     * @return Snapshot
+     */
+    public function merge(Snapshot $concatee): Snapshot
+    {
+        return new static(array_merge($this->entityRows, $concatee->getEntityRows()));
+    }
+
+    /**
      * Count
      *
      * @return int

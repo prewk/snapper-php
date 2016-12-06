@@ -43,7 +43,7 @@ class LargeIntegrationTest extends TestCase
         $compiler = Snapper::makeCompiler();
 
         $compiled = $compiler->compile($schema, $snapshot);
-        
+
         $this->assertEquals(json_decode($testProvider->getCompiled(), true), $compiled->toArray());
     }
 }

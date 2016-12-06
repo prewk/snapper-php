@@ -12,6 +12,7 @@ namespace Prewk\Snapper\Compiler\Sorters;
 use Prewk\Snapper\Compiler\CreateTask;
 use Prewk\Snapper\Compiler\IdMaker;
 use Prewk\Snapper\Compiler\Sorter;
+use Prewk\Snapper\Schema\Entity;
 use Prewk\Snapper\Snapshot;
 use Prewk\Snapper\Snapshot\EntityRow;
 
@@ -40,7 +41,10 @@ class SortByMostRequired implements Sorter
 
         $count = array_count_values($allDeps);
 
-        return $entities->sort(function(EntityRow $a, EntityRow $b) use ($count, $idMaker) {
+        $withDeps = $entities->filter(function(EntityRow $entityRow) use ($count) { return array_key_exists($entityRow->getKey(), $count); });
+        $withoutDeps = $entities->filter(function(EntityRow $entityRow) use ($count) { return !array_key_exists($entityRow->getKey(), $count); });
+
+        return $withDeps->sort(function(EntityRow $a, EntityRow $b) use ($count, $idMaker, &$o) {
             $aId = $a->getKey();
             $bId = $b->getKey();
 
@@ -50,6 +54,6 @@ class SortByMostRequired implements Sorter
             if ($aCount === $bCount) return 0;
 
             return $aCount < $bCount ? -1 : 1;
-        });
+        })->merge($withoutDeps);
     }
 }
