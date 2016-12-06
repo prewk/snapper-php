@@ -149,6 +149,9 @@ class IdResolver
             }
         }
 
+        // Sort for more reliable determinism
+        sort($ids, SORT_NUMERIC);
+
         foreach ($ids as $id) {
             // Due to recursion some earlier handler in this foreach might nullify stuff before this iteration starts 
             if (is_null($this->listeners[$id])) {
