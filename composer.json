@@ -25,7 +25,7 @@
     "bin-dir": "bin"
   },
   "require": {
-    "illuminate/support": "^5.3",
+    "illuminate/support": "5.2",
     "justinrainbow/json-schema": "^4.0",
     "prewk/snapper-schema": "v1.7.2"
   },
