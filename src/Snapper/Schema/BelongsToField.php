@@ -79,6 +79,16 @@ class BelongsToField extends Field
     }
 
     /**
+     * Does the value pass our lowest expectations for a foreign id?
+     *
+     * @param $value
+     * @return bool
+     */
+    protected function isValidForeignId($value): bool {
+        return is_string($value) || (is_int($value) && $value > 0);
+    }
+
+    /**
      * Validate the given value against the schema
      *
      * @param MessageBag $errors
@@ -93,8 +103,9 @@ class BelongsToField extends Field
         if ($errors->isEmpty()) {
             $value = isset($fields[$this->name]) ? $fields[$this->name] : $this->fallback;
 
-            if (is_string($value) || is_int($value)) {
+            if ($this->isValidForeignId($value)) {
                 if (!$entities->hasEntity($this->foreignEntity, $value)) {
+                    var_dump($this->foreignEntity, $value);
                     $errors->add("BelongsTo", "Couldn't find required relation for {$this->name}");
                 }
             }
@@ -113,7 +124,14 @@ class BelongsToField extends Field
      */
     public function transform(array $fields, Closure $transformer): array
     {
-        return [$this->name => $transformer($this->foreignEntity, $this->getValue($fields))];
+        $value = $this->getValue($fields);
+
+        return [
+            $this->name =>
+                $this->isValidForeignId($value)
+                    ? $transformer($this->foreignEntity, $this->getValue($fields))
+                    : $value
+        ];
     }
 
     /**
@@ -131,7 +149,12 @@ class BelongsToField extends Field
         if ($forceCircularFallback) {
             return [$this->localKey => new TaskRawValue($this->circularFallback)];
         } else {
-            return [$this->localKey => new TaskAlias($idMaker->getId($this->getForeignEntity(), $value))];
+            return [
+                $this->localKey =>
+                    $this->isValidForeignId($value)
+                        ? new TaskAlias($idMaker->getId($this->getForeignEntity(), $value))
+                        : new TaskRawValue($value)
+            ];
         }
     }
 

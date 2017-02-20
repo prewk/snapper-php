@@ -42,7 +42,7 @@ class SortByMostRequiredTest extends TestCase
 
         $schema = Snapper::makeSchema($testProvider->getSchema());
         $entities = Snapper::makeSnapshot(json_decode($testProvider->getTransformed(), true));
-        
+
         $createTasks = $entities->mapToArray(function(EntityRow $entityRow) use ($schema, $idMaker) {
             $entitySchema = $schema->getEntityByName($entityRow->getName());
             return $this->makeCreateTask($idMaker, $entitySchema, $entityRow);

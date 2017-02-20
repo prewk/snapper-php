@@ -129,7 +129,7 @@ class Compiler
             $createTask = $this->makeCreateTask($idMaker, $entitySchema, $entityRow);
             $id = $createTask->getId();
             $taskDeps = $createTask->getDependencies();
-            
+
             $circularDeps = $idResolver->findCircularDeps($id, $taskDeps);
 
             if (count($circularDeps)) {

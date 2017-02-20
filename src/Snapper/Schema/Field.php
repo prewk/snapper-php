@@ -130,6 +130,7 @@ abstract class Field implements Arrayable, Objectable
             if ($this->optional) {
                 return $this->fallback;
             } else {
+                print_r($fields);
                 throw new SchemaException("Non-optional field {$this->name} missing its value");
             }
         }

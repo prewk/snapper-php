@@ -1,54 +1,75 @@
 [
   {
+    "name": "fourth_levels",
+    "key": "Zm91cnRoX2xldmVscy8x",
     "fields": {
       "name": "Lorem"
-    },
-    "key": "Zm91cnRoX2xldmVscy8x",
-    "name": "fourth_levels"
+    }
   },
   {
+    "name": "fourth_levels",
+    "key": "Zm91cnRoX2xldmVscy8y",
     "fields": {
       "name": "Ipsum"
-    },
-    "key": "Zm91cnRoX2xldmVscy8y",
-    "name": "fourth_levels"
+    }
   },
   {
+    "name": "recursives",
+    "key": "cmVjdXJzaXZlcy8x",
+    "fields": {
+      "parent": 0
+    }
+  },
+  {
+    "name": "recursives",
+    "key": "cmVjdXJzaXZlcy8y",
+    "fields": {
+      "parent": "cmVjdXJzaXZlcy8x"
+    }
+  },
+  {
+    "name": "second_levels",
+    "key": "c2Vjb25kX2xldmVscy8y",
     "fields": {
       "first_level": "Zmlyc3RfbGV2ZWxzLzE=",
       "name": "Second level two"
-    },
-    "key": "c2Vjb25kX2xldmVscy8y",
-    "name": "second_levels"
+    }
   },
   {
+    "name": "second_levels",
+    "key": "c2Vjb25kX2xldmVscy8z",
     "fields": {
       "first_level": "Zmlyc3RfbGV2ZWxzLzE=",
       "name": "Second level three"
-    },
-    "key": "c2Vjb25kX2xldmVscy8z",
-    "name": "second_levels"
+    }
   },
   {
+    "name": "second_levels",
+    "key": "c2Vjb25kX2xldmVscy8x",
     "fields": {
       "first_level": "Zmlyc3RfbGV2ZWxzLzE=",
       "name": "Second level one"
-    },
-    "key": "c2Vjb25kX2xldmVscy8x",
-    "name": "second_levels"
+    }
   },
   {
-    "fields": {
-      "fav_second_level": "c2Vjb25kX2xldmVscy8x",
-      "name": "First level"
-    },
+    "name": "first_levels",
     "key": "Zmlyc3RfbGV2ZWxzLzE=",
-    "name": "first_levels"
+    "fields": {
+      "name": "First level",
+      "fav_second_level": "c2Vjb25kX2xldmVscy8x"
+    }
   },
   {
+    "name": "third_levels",
+    "key": "dGhpcmRfbGV2ZWxzLzE=",
     "fields": {
+      "second_level": "c2Vjb25kX2xldmVscy8x",
+      "shallow_data": {
+        "html_content": "<p><a href=\"#/first_level/Zmlyc3RfbGV2ZWxzLzE=\">First level</a>, <a href=\"#/second_level/c2Vjb25kX2xldmVscy8z\">Second level three</a><p>"
+      },
       "deep_data": {
         "fourth_level": {
+          "one": "Zm91cnRoX2xldmVscy8x",
           "foo": {
             "bar": {
               "baz": {
@@ -56,62 +77,62 @@
               }
             }
           },
-          "one": "Zm91cnRoX2xldmVscy8x",
           "several": [
             "Zm91cnRoX2xldmVscy8x",
             "Zm91cnRoX2xldmVscy8y"
           ]
         }
-      },
-      "second_level": "c2Vjb25kX2xldmVscy8x",
-      "shallow_data": {
-        "html_content": "<p><a href=\"#/first_level/Zmlyc3RfbGV2ZWxzLzE=\">First level</a>, <a href=\"#/second_level/c2Vjb25kX2xldmVscy8z\">Second level three</a><p>"
       }
-    },
-    "key": "dGhpcmRfbGV2ZWxzLzE=",
-    "name": "third_levels"
+    }
   },
   {
+    "name": "fourth_levels",
+    "key": "Zm91cnRoX2xldmVscy8z",
     "fields": {
       "name": "Dolor"
-    },
-    "key": "Zm91cnRoX2xldmVscy8z",
-    "name": "fourth_levels"
+    }
   },
   {
-    "fields": {
-      "polyable": [
-        "FirstLevel",
-        "Zmlyc3RfbGV2ZWxzLzE="
-      ],
-      "some_level": "Zmlyc3RfbGV2ZWxzLzE=",
-      "type": "first"
-    },
+    "name": "polys",
     "key": "cG9seXMvMQ==",
-    "name": "polys"
-  },
-  {
     "fields": {
       "polyable": [
         "FirstLevel",
         "Zmlyc3RfbGV2ZWxzLzE="
       ],
-      "some_level": "c2Vjb25kX2xldmVscy8z",
-      "type": "second"
-    },
-    "key": "cG9seXMvMg==",
-    "name": "polys"
+      "type": "first",
+      "some_level": "Zmlyc3RfbGV2ZWxzLzE="
+    }
   },
   {
+    "name": "polys",
+    "key": "cG9seXMvMg==",
+    "fields": {
+      "polyable": [
+        "FirstLevel",
+        "Zmlyc3RfbGV2ZWxzLzE="
+      ],
+      "type": "second",
+      "some_level": "c2Vjb25kX2xldmVscy8z"
+    }
+  },
+  {
+    "name": "polys",
+    "key": "cG9seXMvMw==",
     "fields": {
       "polyable": [
         "SecondLevel",
         "c2Vjb25kX2xldmVscy8x"
       ],
-      "some_level": "c2Vjb25kX2xldmVscy8y",
-      "type": "second"
-    },
-    "key": "cG9seXMvMw==",
-    "name": "polys"
+      "type": "second",
+      "some_level": "c2Vjb25kX2xldmVscy8y"
+    }
+  },
+  {
+    "name": "recursives",
+    "key": "cmVjdXJzaXZlcy8z",
+    "fields": {
+      "parent": "cmVjdXJzaXZlcy8y"
+    }
   }
 ]
