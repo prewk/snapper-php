@@ -191,14 +191,12 @@ class TaskSequence implements Arrayable, Countable
             $varNames = [];
             $counter = 0;
             foreach ($values as $value) {
-                if (is_object($value) || is_array($value)) {
-                    $value = '"' . json_encode($value, JSON_UNESCAPED_SLASHES) . '"';
-                } else if (is_null($value)) {
+                if (is_null($value)) {
                     $value = "NULL";
                 } else if (is_int($value) && substr((string)$value, 0, strlen((string)$unique)) === (string)$unique) {
                     $value = "@entity" . substr((string)$value, strlen((string)$unique));
                 } else if (is_string($value)) {
-                    $value = '"' . str_replace("\"", "\\\"", $value) . '""';
+                    $value = "'" . str_replace(["\\", "'"], ["\\\\", "\\'"], $value) . "'";
                 } else if (is_numeric($value)) {
                     $value = $value;
                 } else if (is_bool($value)) {
@@ -214,7 +212,7 @@ class TaskSequence implements Arrayable, Countable
             }
             $sql .= "EXECUTE stmt USING " . implode(", ", $varNames) . ";\n";
             $sql .= "DEALLOCATE PREPARE stmt;\n";
-            $sql .= "SET @entity$entityCounter = SELECT LAST_INSERT_ID()\n";
+            $sql .= "SET @entity$entityCounter = SELECT LAST_INSERT_ID();\n";
 
             return intval($unique . $entityCounter++);
         }, function(string $entityName, string $keyName, int $entityCountId, array $columns, array $values) use (&$sql, &$entityCounter, $unique) {
@@ -226,14 +224,12 @@ class TaskSequence implements Arrayable, Countable
                 $column = $columns[$i];
                 $value = $values[$i];
 
-                if (is_object($value) || is_array($value)) {
-                    $value = '"' . json_encode($value, JSON_UNESCAPED_SLASHES) . '"';
-                } else if (is_null($value)) {
+                if (is_null($value)) {
                     $value = "NULL";
                 } else if (is_int($value) && substr((string)$value, 0, strlen((string)$unique)) === (string)$unique) {
                     $value = "@entity" . substr((string)$value, strlen((string)$unique));
                 } else if (is_string($value)) {
-                    $value = '"' . str_replace("\"", "\\\"", $value) . '"';
+                    $value = "'" . str_replace(["\\", "'"], ["\\\\", "\\'"], $value) . "'";
                 } else if (is_numeric($value)) {
                     $value = $value;
                 } else if (is_bool($value)) {
