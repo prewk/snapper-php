@@ -178,15 +178,17 @@ class TaskSequence implements Arrayable, Countable
      * Create an executable MySQL script of prepared statements from the task sequence
      *
      * @param bool $transaction Wrap in a transaction
+     * @param Closure $entityNameTransformer
      * @return string
      */
-    public function toMysql($transaction = true): string {
+    public function toMysql($transaction = true, Closure $entityNameTransformer = null): string {
         $sql = $transaction ? "START TRANSACTION;\n" : "";
 
         $entityCounter = 0;
         $unique = time();
 
-        $this->toRepository(function(string $entityName, array $columns, array $values) use (&$sql, &$entityCounter, $unique) {
+        $this->toRepository(function(string $entityName, array $columns, array $values) use (&$sql, &$entityCounter, $unique, $entityNameTransformer) {
+            $entityName = is_null($entityNameTransformer) ? $entityName : $entityNameTransformer($entityName);
             $sql .= "PREPARE stmt FROM 'INSERT INTO $entityName (" . implode(", ", $columns) . ") VALUES (" . implode(", ", array_fill(0, count($columns), "?")) . ")';\n";
             $varNames = [];
             $counter = 0;
@@ -212,10 +214,11 @@ class TaskSequence implements Arrayable, Countable
             }
             $sql .= "EXECUTE stmt USING " . implode(", ", $varNames) . ";\n";
             $sql .= "DEALLOCATE PREPARE stmt;\n";
-            $sql .= "SET @entity$entityCounter = SELECT LAST_INSERT_ID();\n";
+            $sql .= "SET @entity$entityCounter = LAST_INSERT_ID();\n";
 
             return intval($unique . $entityCounter++);
-        }, function(string $entityName, string $keyName, int $entityCountId, array $columns, array $values) use (&$sql, &$entityCounter, $unique) {
+        }, function(string $entityName, string $keyName, int $entityCountId, array $columns, array $values) use (&$sql, &$entityCounter, $unique, $entityNameTransformer) {
+            $entityName = is_null($entityNameTransformer) ? $entityName : $entityNameTransformer($entityName);
             $sets = [];
             $varNames = [];
             $varSets = [];
