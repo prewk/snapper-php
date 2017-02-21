@@ -130,7 +130,7 @@ class ValueField extends Field
             return [$this->name => new TaskRawValue($this->circularFallback)];
         }
 
-        return [$this->name => new TaskRawValue($this->getValue($fields))];
+        return [$this->name => new TaskRawValue($this->castValue($this->getValue($fields)))];
     }
 
     /**
