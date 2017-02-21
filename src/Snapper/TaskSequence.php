@@ -241,13 +241,13 @@ class TaskSequence implements Arrayable, Countable
                     throw new InvalidTypeException("Can't convert invalid value for MySQL script");
                 }
 
-                $sets[] = "SET $column = ?";
+                $sets[] = "$column = ?";
                 $varSets[] = "SET @value{$entityCounter}_$counter = $value;";
                 $varNames[] = "@value{$entityCounter}_$counter";
             }
             $varNames[] = "@entity" . substr((string)$entityCountId, strlen((string)$unique));
 
-            $sql .= "PREPARE stmt FROM 'UPDATE $entityName " . implode(", ", $sets) . " WHERE $keyName = ?';\n";
+            $sql .= "PREPARE stmt FROM 'UPDATE $entityName SET " . implode(", ", $sets) . " WHERE $keyName = ?';\n";
             $sql .= implode("\n", $varSets) . "\n";
             $sql .= "EXECUTE stmt USING " . implode(", ", $varNames) . ";\n";
             $sql .= "DEALLOCATE PREPARE stmt;\n";
