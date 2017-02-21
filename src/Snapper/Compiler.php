@@ -81,7 +81,7 @@ class Compiler
         $nameToColumnMap = [];
 
         foreach ($entitySchema->getFields() as $field) {
-            if (in_array($field->getName(), $problematicFields)) {
+            if (in_array($field->getName($entityRow->getFields()), $problematicFields)) {
                 // Circular override
                 $compiledField = $field->compile($idMaker, $entityRow->getFields(), true);
             } else {
