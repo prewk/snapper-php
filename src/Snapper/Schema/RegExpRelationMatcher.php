@@ -112,6 +112,8 @@ class RegExpRelationMatcher implements Arrayable, Objectable
 
         if (count($matches) === count($this->relations)) {
             foreach ($matches as $index => $match) {
+                if (!count($match)) break;
+
                 list($value, $offset) = $match[0];
 
                 if (is_string($this->relations[$index])) {
