@@ -90,6 +90,7 @@ class ValueRelationEntry extends MapEntry
                     if ($value) {
                         $collection->push($value, $this->relation, $path);
                     }
+                    break;
                 case "REGEXP":
                     if (preg_match($this->conditionMatcher, (string)$value) === 1) {
                         $collection->push($value, $this->relation, $path);

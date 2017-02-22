@@ -92,6 +92,7 @@ class ListRelationEntry extends MapEntry
                             if ($subValue) {
                                 $collection->push($subValue, $this->relation, "$path.$index");
                             }
+                            break;
                         case "REGEXP":
                             if (preg_match($this->conditionMatcher, (string)$subValue) === 1) {
                                 $collection->push($subValue, $this->relation, "$path.$index");
