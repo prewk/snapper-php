@@ -10,6 +10,7 @@ declare(strict_types = 1);
 namespace Prewk\Snapper\Schema;
 
 use Prewk\Snapper\Collections\MapDependencyCollection;
+use Prewk\Snapper\Errors\InvalidEnumException;
 use Prewk\Snapper\Snapshot\MapDependency;
 use stdClass;
 
@@ -24,17 +25,40 @@ class ValueRelationEntry extends MapEntry
     private $relation;
 
     /**
-     * ValueRelationEntry constructor.
+     * @var string
+     */
+    private $relationCondition;
+
+    /**
+     * @var string
+     */
+    private $conditionMatcher;
+
+    /**
+     * ValueRelationEntry constructor
+     *
      * @param MapEntryPath $path
      * @param string $relation
+     * @param string $relationCondition
+     * @param string $conditionMatcher
+     * @throws InvalidEnumException
      */
     public function __construct(
         MapEntryPath $path,
-        string $relation
+        string $relation,
+        string $relationCondition,
+        string $conditionMatcher = ""
     ) {
+        if (!in_array($relationCondition, ["NON_ZERO_INT", "REGEXP", "NONE"])) {
+            throw new InvalidEnumException("Invalid 'relationCondition' enum: $relationCondition");
+        }
+
         parent::__construct($path);
+
         $this->path = $path;
         $this->relation = $relation;
+        $this->relationCondition = $relationCondition;
+        $this->conditionMatcher = $conditionMatcher;
     }
 
     /**
@@ -56,8 +80,20 @@ class ValueRelationEntry extends MapEntry
     public function getDependencies(MapDependencyCollection $collection, array $map, array $dotMap): MapDependencyCollection
     {
         foreach ($this->path->query($map, $dotMap) as $path => $value) {
-            if (is_scalar($value)) {
-                $collection->push($value, $this->relation, $path);
+            switch ($this->relationCondition) {
+                case "NON_ZERO_INT":
+                    if (is_int($value) && $value > 0) {
+                        $collection->push($value, $this->relation, $path);
+                    }
+                    break;
+                case "REGEXP":
+                    if (preg_match($this->conditionMatcher, (string)$value) === 1) {
+                        $collection->push($value, $this->relation, $path);
+                    }
+                    break;
+                case "NONE":
+                    $collection->push($value, $this->relation, $path);
+                    break;
             }
         }
 
@@ -75,6 +111,8 @@ class ValueRelationEntry extends MapEntry
             "type" => "VALUE_RELATION_ENTRY",
             "path" => $this->path,
             "relation" => $this->relation,
+            "relationCondition" => $this->relationCondition,
+            "conditionMatcher" => $this->conditionMatcher,
         ];
     }
 
@@ -90,6 +128,8 @@ class ValueRelationEntry extends MapEntry
         $obj->type = "VALUE_RELATION_ENTRY";
         $obj->path = $this->path->getPath();
         $obj->relation = $this->relation;
+        $obj->relationCondition = $this->relationCondition;
+        $obj->conditionMatcher = $this->conditionMatcher;
 
         return $obj;
     }

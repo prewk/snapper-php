@@ -14,6 +14,7 @@ use Illuminate\Contracts\Support\MessageBag;
 use Prewk\Snapper\Compiler\IdMaker;
 use Prewk\Snapper\Compiler\TaskAlias;
 use Prewk\Snapper\Compiler\TaskRawValue;
+use Prewk\Snapper\Errors\InvalidEnumException;
 use Prewk\Snapper\Errors\SchemaException;
 use Prewk\Snapper\Snapshot;
 use stdClass;
@@ -34,27 +35,49 @@ class BelongsToField extends Field
     private $localKey;
 
     /**
+     * @var string
+     */
+    private $relationCondition;
+
+    /**
+     * @var string
+     */
+    private $conditionMatcher;
+
+    /**
      * BelongsToField constructor
      *
      * @param string $name
      * @param string $foreignEntity
      * @param string $localKey
+     * @param string $relationCondition
      * @param bool $optional
      * @param mixed|null $fallback
      * @param mixed|null $circularFallback
+     * @param string $conditionMatcher
+     * @throws InvalidEnumException
      */
     public function __construct(
         string $name,
         string $foreignEntity,
         string $localKey,
+        string $relationCondition,
         bool $optional = false,
         $fallback = null,
-        $circularFallback = null
+        $circularFallback = null,
+        string $conditionMatcher = ""
     )
     {
+        if (!in_array($relationCondition, ["NON_ZERO_INT", "REGEXP", "NONE"])) {
+            throw new InvalidEnumException("Invalid 'relationCondition' enum: $relationCondition");
+        }
+
         parent::__construct($name, $optional, $fallback, $circularFallback);
+
         $this->foreignEntity = $foreignEntity;
         $this->localKey = $localKey;
+        $this->relationCondition = $relationCondition;
+        $this->conditionMatcher = $conditionMatcher;
     }
 
 
@@ -79,13 +102,22 @@ class BelongsToField extends Field
     }
 
     /**
-     * Does the value pass our lowest expectations for a foreign id?
+     * Does the value pass our expectations for a foreign id?
      *
      * @param $value
      * @return bool
      */
     protected function isValidForeignId($value): bool {
-        return is_string($value) || (is_int($value) && $value > 0);
+        switch ($this->relationCondition) {
+            case "NON_ZERO_INT":
+                return is_int($value) && $value > 0;
+            case "REGEXP":
+                return preg_match($this->conditionMatcher, (string)$value) === 1;
+            case "NONE":
+                return true;
+            default:
+                return false;
+        }
     }
 
     /**
@@ -173,6 +205,8 @@ class BelongsToField extends Field
             "optional" => $this->optional,
             "fallback" => $this->fallback,
             "circularFallback" => $this->circularFallback,
+            "relationCondition" => $this->relationCondition,
+            "conditionMatcher" => $this->conditionMatcher,
         ];
     }
 
@@ -192,6 +226,8 @@ class BelongsToField extends Field
         $obj->optional = $this->optional;
         $obj->fallback = $this->fallback;
         $obj->circularFallback = $this->circularFallback;
+        $obj->relationCondition = $this->relationCondition;
+        $obj->conditionMatcher = $this->conditionMatcher;
 
         return $obj;
     }

@@ -89,9 +89,11 @@ class Schema implements Arrayable
                     $schema->name,
                     $schema->foreignEntity,
                     $schema->localKey,
+                    $schema->relationCondition,
                     $schema->optional,
                     $schema->fallback,
-                    $schema->circularFallback
+                    $schema->circularFallback,
+                    $schema->conditionMatcher
                 );
             case "MORPH_TO":
                 return new MorphToField(
@@ -129,7 +131,7 @@ class Schema implements Arrayable
                     $schema->circularFallback
                 );
             case "LIST_RELATION_ENTRY":
-                return new ListRelationEntry(new MapEntryPath($schema->path), $schema->relation);
+                return new ListRelationEntry(new MapEntryPath($schema->path), $schema->relation, $schema->relationCondition, $schema->conditionMatcher);
             case "PRIMARY_KEY":
                 return new PrimaryKeyField($schema->name);
             case "REG_EXP_RELATION_ENTRY":
@@ -139,7 +141,7 @@ class Schema implements Arrayable
                         return new RegExpRelationMatcher($rawMatcher->expression, $rawMatcher->relations, $rawMatcher->cast);
                     }, $schema->matchers));
             case "VALUE_RELATION_ENTRY":
-                return new ValueRelationEntry(new MapEntryPath($schema->path), $schema->relation);
+                return new ValueRelationEntry(new MapEntryPath($schema->path), $schema->relation, $schema->relationCondition, $schema->conditionMatcher);
             default:
                 throw new SchemaException("Invalid field type encountered: {$schema->type}");
         }
