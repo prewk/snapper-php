@@ -48,7 +48,7 @@ class ListRelationEntry extends MapEntry
         string $relationCondition,
         string $conditionMatcher = ""
     ) {
-        if (!in_array($relationCondition, ["NON_ZERO_INT", "REGEXP", "NONE"])) {
+        if (!in_array($relationCondition, ["NON_ZERO_INT", "REGEXP", "NONE", "TRUTHY"])) {
             throw new InvalidEnumException("Invalid 'relationCondition' enum: $relationCondition");
         }
 
@@ -88,6 +88,10 @@ class ListRelationEntry extends MapEntry
                                 $collection->push($subValue, $this->relation, "$path.$index");
                             }
                             break;
+                        case "TRUTHY":
+                            if ($subValue) {
+                                $collection->push($subValue, $this->relation, "$path.$index");
+                            }
                         case "REGEXP":
                             if (preg_match($this->conditionMatcher, (string)$subValue) === 1) {
                                 $collection->push($subValue, $this->relation, "$path.$index");

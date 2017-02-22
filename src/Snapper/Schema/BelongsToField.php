@@ -68,7 +68,7 @@ class BelongsToField extends Field
         string $conditionMatcher = ""
     )
     {
-        if (!in_array($relationCondition, ["NON_ZERO_INT", "REGEXP", "NONE"])) {
+        if (!in_array($relationCondition, ["NON_ZERO_INT", "REGEXP", "NONE", "TRUTHY"])) {
             throw new InvalidEnumException("Invalid 'relationCondition' enum: $relationCondition");
         }
 
@@ -111,6 +111,8 @@ class BelongsToField extends Field
         switch ($this->relationCondition) {
             case "NON_ZERO_INT":
                 return is_int($value) && $value > 0;
+            case "TRUTHY":
+                return !!$value;
             case "REGEXP":
                 return preg_match($this->conditionMatcher, (string)$value) === 1;
             case "NONE":
