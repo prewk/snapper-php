@@ -27,7 +27,7 @@
   "require": {
     "illuminate/support": "5.2.*",
     "justinrainbow/json-schema": "^4.0",
-    "prewk/snapper-schema": "v1.7.4"
+    "prewk/snapper-schema": "1.8.0"
   },
   "require-dev": {
     "phpspec/phpspec": "^3.1",

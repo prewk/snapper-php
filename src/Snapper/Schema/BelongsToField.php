@@ -137,7 +137,6 @@ class BelongsToField extends Field
 
             if ($this->isValidForeignId($value)) {
                 if (!$entities->hasEntity($this->foreignEntity, $value)) {
-                    var_dump($this->foreignEntity, $value);
                     $errors->add("BelongsTo", "Couldn't find required relation for {$this->name}");
                 }
             }

@@ -6,7 +6,6 @@ use PHPUnit\Framework\TestCase;
 use Prewk\Snapper;
 use Prewk\Snapper\Compiler\CreateTask;
 use Prewk\Snapper\Compiler\IdMaker;
-use Prewk\Snapper\Compiler\TaskAlias;
 use Prewk\Snapper\Schema\Entity;
 use Prewk\Snapper\Snapshot;
 use Prewk\Snapper\Snapshot\EntityRow;

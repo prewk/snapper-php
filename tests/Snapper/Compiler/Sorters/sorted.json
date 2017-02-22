@@ -14,20 +14,6 @@
     }
   },
   {
-    "name": "recursives",
-    "key": "cmVjdXJzaXZlcy8x",
-    "fields": {
-      "parent": 0
-    }
-  },
-  {
-    "name": "recursives",
-    "key": "cmVjdXJzaXZlcy8y",
-    "fields": {
-      "parent": "cmVjdXJzaXZlcy8x"
-    }
-  },
-  {
     "name": "second_levels",
     "key": "c2Vjb25kX2xldmVscy8y",
     "fields": {
@@ -79,9 +65,12 @@
           },
           "several": [
             "Zm91cnRoX2xldmVscy8x",
+            0,
+            null,
             "Zm91cnRoX2xldmVscy8y"
           ]
-        }
+        },
+        "maybe_second_level": "NO"
       }
     }
   },
@@ -126,6 +115,20 @@
       ],
       "type": "second",
       "some_level": "c2Vjb25kX2xldmVscy8y"
+    }
+  },
+  {
+    "name": "recursives",
+    "key": "cmVjdXJzaXZlcy8x",
+    "fields": {
+      "parent": 0
+    }
+  },
+  {
+    "name": "recursives",
+    "key": "cmVjdXJzaXZlcy8y",
+    "fields": {
+      "parent": "cmVjdXJzaXZlcy8x"
     }
   },
   {
