@@ -26,12 +26,13 @@
   },
   "require": {
     "illuminate/support": "5.2.*",
-    "justinrainbow/json-schema": "^4.0",
-    "prewk/snapper-schema": "1.8.1"
+    "marcj/topsort": "^1.1",
+    "ramsey/uuid": "^3.7",
+    "prewk/option": "^1.0"
   },
   "require-dev": {
     "phpspec/phpspec": "^3.1",
-    "symfony/yaml": "^3.1",
-    "phpunit/phpunit": "^5.6"
+    "phpunit/phpunit": "^5.6",
+    "symfony/var-dumper": "^3.3"
   }
 }
