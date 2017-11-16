@@ -23,6 +23,7 @@ class Value implements Ingredient
      *
      * @param mixed $value
      * @param array $row
+     * @param bool $circular
      * @return array Array of [type, id] tuples
      */
     public function getDeps($value, array $row, bool $circular = false): array

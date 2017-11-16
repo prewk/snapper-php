@@ -57,6 +57,8 @@ class Morph implements Ingredient
     public function optional(...$optionalValues): self
     {
         $this->optionalValues = $optionalValues;
+
+        return $this;
     }
 
     /**
