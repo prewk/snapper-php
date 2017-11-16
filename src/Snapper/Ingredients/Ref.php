@@ -79,7 +79,7 @@ class Ref implements Ingredient
     public function serialize($value, array $row, BookKeeper $books, bool $circular = false): Option
     {
         foreach ($this->optionalValues as $opt) {
-            if ($opt === $value) return new None;
+            if ($opt === $value) return new Some($value);
         }
 
         return new Some($books->resolveId($this->type, $value));

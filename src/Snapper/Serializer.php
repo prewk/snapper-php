@@ -9,9 +9,14 @@ declare(strict_types=1);
 
 namespace Prewk\Snapper;
 
+use Closure;
+use Prewk\Snapper;
 use Prewk\Snapper\Exceptions\RecipeException;
 use Prewk\Snapper\Ingredients\Circular;
+use Prewk\Snapper\Serializer\Events\OnInsert;
+use Prewk\Snapper\Serializer\Events\OnUpdate;
 use Prewk\Snapper\Serializer\SerializationBookKeeper;
+use Prewk\Snapper\Serializer\SerializerEvent;
 
 /**
  * Serializer
@@ -47,6 +52,11 @@ class Serializer
      * @var array
      */
     private $circularRows = [];
+
+    /**
+     * @var SerializerEvent[]
+     */
+    private $events = [];
 
     /**
      * Serializer constructor
@@ -89,30 +99,37 @@ class Serializer
         $resolvedCircularRow = [];
         $requiredCircularFields = [];
 
+        // Go through all ingredients in the recipe
         foreach ($recipe->getIngredients() as $field => $ingredient) {
             if (!array_key_exists($field, $row)) {
                 continue;
             }
 
+            // Convert dependencies into internal ids
             $deps = array_merge($deps, array_map(function(array $pair) {
                 return $this->bookKeeper->resolveId(...$pair);
             }, $ingredient->getDeps($row[$field], $row, false)));
 
+            // Resolve the field's value
             $val = $ingredient->serialize($row[$field], $row, $this->bookKeeper, false);
             if ($val->isSome()) {
                 $resolvedRow[$field] = $val->unwrap();
             }
 
+            // Handle possible circular refs - ends up as UPDATE ops
             if ($ingredient instanceof Circular) {
+                // Convert circular dependencies into internal ids
                 $circularDeps = array_merge($circularDeps, array_map(function(array $pair) use ($ingredient) {
                     return $this->bookKeeper->resolveId(...$pair);
                 }, $ingredient->getDeps($row[$field], $row, true)));
 
+                // Resolve the circular field's value
                 $val = $ingredient->serialize($row[$field], $row, $this->bookKeeper, true);
                 if ($val->isSome()) {
                     $resolvedCircularRow[$field] = $val->unwrap();
                 }
 
+                // Some ingredients require extra fields to be present to be able to function properly
                 $requiredCircularFields = array_merge($requiredCircularFields, $ingredient->getRequiredExtraFields());
             }
         }
@@ -127,11 +144,31 @@ class Serializer
                 }
             }
 
+            // Call OnUpdate events
+            foreach ($this->events as $event) {
+                if ($event instanceof OnUpdate) {
+                    $overwrite = $event->call($type, $resolvedCircularRow);
+                    if (is_array($overwrite)) {
+                        $resolvedCircularRow = $overwrite;
+                    }
+                }
+            }
+
             $this->circularRows[$uuid] = [
                 "deps" => $circularDeps,
                 "row" => $resolvedCircularRow,
                 "type" => $type,
             ];
+        }
+
+        // Call OnInsert events
+        foreach ($this->events as $event) {
+            if ($event instanceof OnInsert) {
+                $overwrite = $event->call($type, $resolvedRow);
+                if (is_array($overwrite)) {
+                    $resolvedRow = $overwrite;
+                }
+            }
         }
 
         $this->rows[$uuid] = [
@@ -143,6 +180,22 @@ class Serializer
         $this->circularSorter->add($uuid);
 
         return $this;
+    }
+
+    /**
+     * Register an event
+     *
+     * @param SerializerEvent $event
+     * @return Closure
+     */
+    public function on(SerializerEvent $event): Closure
+    {
+        $index = count($this->events);
+        $this->events[] = $event;
+
+        return function() use ($index) {
+            unset($this->events[$index]);
+        };
     }
 
     /**
@@ -167,7 +220,7 @@ class Serializer
                 $item = $this->rows[$uuid];
 
                 return [
-                    "op" => "INSERT",
+                    "op" => Snapper::INSERT,
                     "type" => $item["type"],
                     "row" => $item["row"],
                 ];
@@ -176,7 +229,7 @@ class Serializer
                 $item = $this->circularRows[$uuid];
 
                 return [
-                    "op" => "UPDATE",
+                    "op" => Snapper::UPDATE,
                     "type" => $item["type"],
                     "row" => $item["row"],
                 ];

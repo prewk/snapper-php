@@ -106,11 +106,10 @@ class Json implements Ingredient
     {
         if (!is_string($value)) return new Some($value);
 
-        foreach ($this->getDeps() as list($type, $id)) {
+        foreach ($this->getDeps($value, $row, false) as list($type, $id)) {
             $replacement = $books->resolveId($type, $id);
-            dump("Replacing $id with $replacement");
-            $value = str_replace($id, $replacement, $value);
             $value = str_replace("\"$id\"", $replacement, $value);
+            $value = str_replace($id, $replacement, $value);
         }
 
         return new Some($value);

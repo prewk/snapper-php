@@ -84,18 +84,18 @@ class MatchedJson
      * Parse the field value as text with references contained within
      *
      * @param string $pattern
-     * @param Closure $regexpHandler
+     * @param Closure $textReplacer
      * @return MatchedJson
      * @throws RecipeException
      */
-    public function regexp(string $pattern, Closure $regexpHandler): self
+    public function regexp(string $pattern, Closure $textReplacer): self
     {
         if ($this->mode === self::SINGLE_MODE) {
             throw new RecipeException("MatchedJson must use 1 call to ref OR {n} calls to regexp, they can't be combined");
         }
 
         $this->mode = self::REGEXP_MODE;
-        $this->regexpHandlers[$pattern] = $regexpHandler;
+        $this->regexpHandlers[$pattern] = $textReplacer;
 
         return $this;
     }
@@ -122,7 +122,7 @@ class MatchedJson
                 $deps = [];
 
                 foreach ($this->regexpHandlers as $pattern => $handler) {
-                    $preg = preg_match_all($pattern, $value, $matches, PREG_SET_ORDER);
+                    $preg = preg_match_all($pattern, (string)$value, $matches, PREG_SET_ORDER);
                     if ($preg === false || $preg === 0) continue;
 
                     foreach ($matches as $match) {
@@ -163,7 +163,7 @@ class MatchedJson
                 $wip = $value;
 
                 foreach ($this->regexpHandlers as $pattern => $handler) {
-                    $preg = preg_match_all($pattern, $value, $matches, PREG_SET_ORDER);
+                    $preg = preg_match_all($pattern, (string)$value, $matches, PREG_SET_ORDER);
                     if ($preg === false || $preg === 0) continue;
 
                     foreach ($matches as $match) {

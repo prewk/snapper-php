@@ -14,5 +14,6 @@ namespace Prewk;
  */
 class Snapper
 {
-
+    const INSERT = "INSERT";
+    const UPDATE = "UPDATE";
 }

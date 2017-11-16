@@ -10,7 +10,12 @@ declare(strict_types=1);
 namespace Prewk\Snapper;
 
 use Closure;
+use Prewk\Snapper;
 use Prewk\Snapper\Deserializer\DeserializationBookKeeper;
+use Prewk\Snapper\Deserializer\DeserializerEvent;
+use Prewk\Snapper\Deserializer\Events\OnInsert;
+use Prewk\Snapper\Deserializer\Events\OnUpdate;
+use Prewk\Snapper\Exceptions\IntegrityException;
 
 /**
  * Deserializer
@@ -38,6 +43,11 @@ class Deserializer
     private $bookKeeper;
 
     /**
+     * @var DeserializerEvent[]
+     */
+    private $events = [];
+
+    /**
      * Deserializer constructor
      *
      * @param DeserializationBookKeeper $bookKeeper
@@ -54,56 +64,93 @@ class Deserializer
     }
 
     /**
+     * Execute the given job
+     *
+     * @param array $item
+     * @throws IntegrityException
+     */
+    protected function runOp(array $item)
+    {
+        $op = $item["op"];
+        $type = $item["type"];
+        $row = $item["row"];
+
+        if (!array_key_exists($type, $this->recipes) || !array_key_exists($type, $this->inserters) || !array_key_exists($type, $this->updaters)) {
+            throw new RecipeException("Unknown type: $type");
+        }
+
+        $recipe = $this->recipes[$type];
+
+        $uuid = $row[$recipe->getPrimaryKey()];
+        $resolvedRow = [];
+
+        // Go through the ingredients
+        foreach ($recipe->getIngredients() as $field => $ingredient) {
+            if (!array_key_exists($field, $row)) {
+                continue;
+            }
+
+            // Get the deserialized field value using the ingredient and previously accumulated ids
+            $val = $ingredient->deserialize($row[$field], $row, $this->bookKeeper);
+
+            if ($val->isSome()) {
+                $resolvedRow[$field] = $val->unwrap();
+            }
+        }
+
+        // Fire events
+        foreach ($this->events as $event) {
+            if ($op === Snapper::INSERT && $event instanceof OnInsert) {
+                $event->call($type, $resolvedRow);
+            } else if ($op === Snapper::UPDATE && $event instanceof OnUpdate) {
+                $event->call($type, $resolvedRow);
+            }
+        }
+
+        if ($op === Snapper::INSERT) {
+            // Remove the primary key from the INSERT row before sending to the inserter
+            unset($row[$recipe->getPrimaryKey()]);
+
+            // Create the row using the inserter
+            $id = $this->inserters[$type]($resolvedRow);
+
+            if (!isset($id)) {
+                throw new IntegrityException("Inserters must return the primary key created");
+            }
+
+            // Next time this internal serialization uuid is requested - answer with the database id
+            $this->bookKeeper->wire($uuid, $id);
+        } else if ($op === Snapper::UPDATE) {
+            // Update the row using the updater
+            $this->updaters[$type]($this->bookKeeper->resolveId($type, $uuid), $resolvedRow);
+        }
+    }
+
+    /**
+     * Register an event
+     *
+     * @param DeserializerEvent $event
+     * @return Closure Unregistering function
+     */
+    public function on(DeserializerEvent $event): Closure
+    {
+        $index = count($this->events);
+        $this->events[] = $event;
+
+        return function() use ($index) {
+            unset($this->events[$index]);
+        };
+    }
+
+    /**
+     * Iterate through the serialized sequence and execute the inserts and updates
+     *
      * @param array $serialization
      */
     public function deserialize(array $serialization)
     {
         foreach ($serialization as $item) {
-            $op = $item["op"];
-            $type = $item["type"];
-            $row = $item["row"];
-
-            if (!array_key_exists($type, $this->recipes) || !array_key_exists($type, $this->inserters) || !array_key_exists($type, $this->updaters)) {
-                throw new RecipeException("Unknown type: $type");
-            }
-
-            $recipe = $this->recipes[$type];
-
-            $uuid = $row[$recipe->getPrimaryKey()];
-            $resolvedRow = [];
-
-            if ($op === "INSERT") {
-                unset($row[$recipe->getPrimaryKey()]);
-
-                foreach ($recipe->getIngredients() as $field => $ingredient) {
-                    if (!array_key_exists($field, $row)) {
-                        continue;
-                    }
-
-                    $val = $ingredient->deserialize($row[$field], $row, $this->bookKeeper);
-
-                    if ($val->isSome()) {
-                        $resolvedRow[$field] = $val->unwrap();
-                    }
-                }
-
-                $id = $this->inserters[$type]($resolvedRow);
-                $this->bookKeeper->wire($uuid, $id);
-            } else if ($op === "UPDATE") {
-                foreach ($recipe->getIngredients() as $field => $ingredient) {
-                    if (!array_key_exists($field, $row)) {
-                        continue;
-                    }
-
-                    $val = $ingredient->deserialize($row[$field], $row, $this->bookKeeper);
-
-                    if ($val->isSome()) {
-                        $resolvedRow[$field] = $val->unwrap();
-                    }
-                }
-
-                $this->updaters[$type]($this->bookKeeper->resolveId($type, $uuid), $resolvedRow);
-            }
+            $this->runOp($item);
         }
     }
 }
