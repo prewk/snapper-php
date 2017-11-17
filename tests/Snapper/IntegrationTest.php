@@ -2,7 +2,6 @@
 
 namespace Prewk\Snapper;
 
-use Illuminate\Support\Arr;
 use PDO;
 use PHPUnit\Framework\TestCase;
 use Prewk\Snapper\Deserializer\DeserializationBookKeeper;
