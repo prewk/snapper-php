@@ -108,7 +108,7 @@ class Json implements Ingredient
 
         foreach ($this->getDeps($value, $row, false) as list($type, $id)) {
             $replacement = $books->resolveId($type, $id);
-            if (is_int($replacement)) {
+            if (is_numeric($replacement)) {
                 $value = str_replace("\"$id\"", $replacement, $value);
             }
             $value = str_replace($id, $replacement, $value);

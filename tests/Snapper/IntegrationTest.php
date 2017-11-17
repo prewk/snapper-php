@@ -166,7 +166,7 @@ class IntegrationTest extends TestCase
                     ":favorite_node_id" => $row["favorite_node_id"],
                 ]);
 
-                return $db->lastInsertId();
+                return intval($db->lastInsertId());
             },
             "nodes" => function(array $row) use ($db) {
                 $insert = "INSERT INTO nodes (root_id, parent) VALUES (:root_id, :parent)";
@@ -176,7 +176,7 @@ class IntegrationTest extends TestCase
                     ":parent" => $row["parent"],
                 ]);
 
-                return $db->lastInsertId();
+                return intval($db->lastInsertId());
             },
             "polys" => function(array $row) use ($db) {
                 $insert = "INSERT INTO polys (polyable_type, polyable_id, json) VALUES (:polyable_type, :polyable_id, :json)";
@@ -187,7 +187,7 @@ class IntegrationTest extends TestCase
                     ":json" => $row["json"],
                 ]);
 
-                return $db->lastInsertId();
+                return intval($db->lastInsertId());
             },
             "children" => function(array $row) use ($db) {
                 $insert = "INSERT INTO children (type, variable_pointer_id) VALUES (:type, :variable_pointer_id)";
@@ -197,7 +197,7 @@ class IntegrationTest extends TestCase
                     ":variable_pointer_id" => $row["variable_pointer_id"],
                 ]);
 
-                return $db->lastInsertId();
+                return intval($db->lastInsertId());
             },
         ];
 
