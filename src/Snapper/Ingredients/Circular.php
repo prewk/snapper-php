@@ -31,7 +31,7 @@ class Circular implements Ingredient
      * Circular constructor
      *
      * @param Ingredient $ingredient
-     * @param $fallback
+     * @param Ingredient $fallback
      */
     public function __construct(Ingredient $ingredient, Ingredient $fallback)
     {

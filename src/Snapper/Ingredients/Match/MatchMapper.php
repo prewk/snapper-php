@@ -148,8 +148,8 @@ class MatchMapper
     public function serialize($value, array $row, BookKeeper $books, bool $circular = false): Option
     {
         return $this->getMatchedIngredient($row)
-            ->andThen(function(Ingredient $matched) use ($value, $row, $books) {
-                return $matched->serialize($value, $row, $books);
+            ->andThen(function(Ingredient $matched) use ($value, $row, $books, $circular) {
+                return $matched->serialize($value, $row, $books, $circular);
             });
     }
 
@@ -163,6 +163,9 @@ class MatchMapper
      */
     public function deserialize($value, array $row, BookKeeper $books): Option
     {
-        return $this->serialize($value, $row, $books, false);
+        return $this->getMatchedIngredient($row)
+            ->andThen(function(Ingredient $matched) use ($value, $row, $books) {
+                return $matched->deserialize($value, $row, $books);
+            });
     }
 }

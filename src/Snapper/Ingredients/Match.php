@@ -109,7 +109,10 @@ class Match implements Ingredient
      */
     public function deserialize($value, array $row, BookKeeper $books): Option
     {
-        return $this->serialize($value, $row, $books, false);
+        return $this->getMatcher($row)
+            ->andThen(function(MatchMapper $matchMapper) use ($value, $row, $books) {
+                return $matchMapper->deserialize($value, $row, $books);
+            });
     }
 
     /**
