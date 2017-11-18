@@ -12,8 +12,11 @@ before_script:
 
 script:
   - ./bin/phpspec run
+  - cat ./build/merge/phpspec.xml
   - ./bin/phpunit --coverage-clover build/merge/phpunit.xml
+  - cat ./build/merge/phpunit.xml
   - ./bin/phpcov merge --clover ./build/logs/clover.xml ./build/merge
+  - cat ./build/logs/clover.xml
 
 after_success:
   - cat ./build/logs/clover.xml
