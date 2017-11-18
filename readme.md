@@ -140,6 +140,7 @@ $serialization = $serializer->compile();
 <?php
 use Prewk\Snapper;
 
+// $recipe = <Same as above>
 // $serialization = <The snapshot>
 // $dbh = <PDO handler>
 
