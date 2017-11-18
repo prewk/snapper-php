@@ -22,4 +22,11 @@ interface BookKeeper
      * @return mixed
      */
     public function resolveId($type, $id);
+
+    /**
+     * Reset the BookKeeper's internal state
+     *
+     * @return BookKeeper
+     */
+    public function reset(): BookKeeper;
 }

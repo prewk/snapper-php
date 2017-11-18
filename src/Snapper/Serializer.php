@@ -74,6 +74,20 @@ class Serializer
     }
 
     /**
+     * Set/Override a recipe
+     *
+     * @param string $type
+     * @param Recipe $recipe
+     * @return Serializer
+     */
+    public function setRecipe(string $type, Recipe $recipe): self
+    {
+        $this->recipes[$type] = $recipe;
+
+        return $this;
+    }
+
+    /**
      * Add a row
      *
      * @param string $type

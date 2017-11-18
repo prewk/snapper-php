@@ -12,7 +12,7 @@ use Prewk\Snapper\Ingredients\Match\MatchMapper;
 use Prewk\Snapper\Ingredients\Morph\MorphMapper;
 use Prewk\Snapper\Serializer\SerializationBookKeeper;
 
-class IntegrationTest extends TestCase
+class SnapperIntegrationTest extends TestCase
 {
     public function getTestRows()
     {
@@ -139,6 +139,30 @@ class IntegrationTest extends TestCase
             $items[] = $item;
         }
         return $items;
+    }
+
+    public function test_validator()
+    {
+        $recipes = $this->getTestRecipes();
+        $testRows = $this->getTestRows();
+
+        $serializer = new Serializer(new Sorter, new SerializationBookKeeper, $recipes);
+
+        foreach ($testRows as list($type, $row)) {
+            $serializer->add($type, $row);
+        }
+
+        $serialization = $serializer->compile();
+        $validator = new Validator(new DeserializationBookKeeper, $recipes);
+
+        // This serialization should validate
+        $this->assertTrue($validator->validate($serialization));
+
+        // Break it
+        $serialization[0]["row"]["id"] = "BROKEN";
+
+        // This serialization shouldn't validate
+        $this->assertFalse($validator->validate($serialization));
     }
 
     public function test_full_recipe()

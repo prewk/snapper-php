@@ -49,4 +49,16 @@ class DeserializationBookKeeper implements BookKeeper
     {
         $this->ids[$from] = $to;
     }
+
+    /**
+     * Reset the BookKeeper's internal state
+     *
+     * @return BookKeeper
+     */
+    public function reset(): BookKeeper
+    {
+        $this->ids = [];
+
+        return $this;
+    }
 }

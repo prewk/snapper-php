@@ -64,12 +64,55 @@ class Deserializer
     }
 
     /**
+     * Set/Override a recipe
+     *
+     * @param string $type
+     * @param Recipe $recipe
+     * @return Deserializer
+     */
+    public function setRecipe(string $type, Recipe $recipe): self
+    {
+        $this->recipes[$type] = $recipe;
+
+        return $this;
+    }
+
+    /**
+     * Set/Override an inserter
+     *
+     * @param string $type
+     * @param Closure $inserter
+     * @return Deserializer
+     */
+    public function setInserter(string $type, Closure $inserter): self
+    {
+        $this->inserters[$type] = $inserter;
+
+        return $this;
+    }
+
+    /**
+     * Set/Override an updater
+     *
+     * @param string $type
+     * @param Closure $updater
+     * @return Deserializer
+     */
+    public function setUpdater(string $type, Closure $updater): self
+    {
+        $this->updaters[$type] = $updater;
+
+        return $this;
+    }
+
+    /**
      * Execute the given job
      *
      * @param array $item
+     * @return Deserializer
      * @throws IntegrityException
      */
-    protected function runOp(array $item)
+    protected function runOp(array $item): self
     {
         $op = $item["op"];
         $type = $item["type"];
@@ -124,6 +167,8 @@ class Deserializer
             // Update the row using the updater
             $this->updaters[$type]($this->bookKeeper->resolveId($type, $uuid), $resolvedRow);
         }
+
+        return $this;
     }
 
     /**

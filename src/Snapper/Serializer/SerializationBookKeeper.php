@@ -59,4 +59,17 @@ class SerializationBookKeeper implements BookKeeper
 
         return $uuid;
     }
+
+    /**
+     * Reset the BookKeeper's internal state
+     *
+     * @return BookKeeper
+     */
+    public function reset(): BookKeeper
+    {
+        $this->idByPair = [];
+        $this->pairById = [];
+
+        return $this;
+    }
 }
