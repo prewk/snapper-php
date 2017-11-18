@@ -16,7 +16,9 @@ script:
   - ./bin/phpcov merge ./build/merge --clover ./build/logs/clover.xml
 
 after_success:
-  - ./bin/coveralls -v
+  - rm -rf ./build/merge
+  - cat ./build/logs/clover.xml
+  - travis_retry ./bin/coveralls -v
 
 branches:
   only: master
