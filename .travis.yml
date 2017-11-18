@@ -1,0 +1,19 @@
+language: php
+php:
+  - '7.0'
+  - '7.1'
+
+install:
+  - travis_retry composer install --no-interaction
+
+before_script:
+    - mkdir -p build/logs
+
+script:
+  - ./bin/phpunit --coverage-clover build/logs/clover.xml
+
+after_success:
+  - ./bin/coveralls -v
+
+branches:
+  only: master
