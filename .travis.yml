@@ -7,10 +7,13 @@ install:
   - travis_retry composer install --no-interaction
 
 before_script:
+    - mkdir -p build/merge
     - mkdir -p build/logs
 
 script:
-  - ./bin/phpunit --coverage-clover build/logs/clover.xml
+  - ./bin/phpunit --coverage-clover build/merge/phpunit.xml
+  - ./bin/phpspec run
+  - ./bin/phpcov merge ./build/merge --clover ./build/logs/clover.xml
 
 after_success:
   - ./bin/coveralls -v
