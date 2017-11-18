@@ -1,4 +1,4 @@
-# Snapper 🐡
+# Snapper 🐡 [![Coverage Status](https://coveralls.io/repos/github/prewk/snapper-php/badge.svg?branch=master)](https://coveralls.io/github/prewk/snapper-php?branch=master) [![Build Status](https://travis-ci.org/prewk/snapper-php.svg?branch=master)](https://travis-ci.org/prewk/snapper-php)
 
 Converts rows from a relational database into serialization snapshots that can be deserialized into new rows at a later time with complex relationships preserved.
 
