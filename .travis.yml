@@ -15,7 +15,7 @@ script:
   - cat ./build/merge/phpspec.xml
   - ./bin/phpunit --coverage-clover build/merge/phpunit.xml
   - cat ./build/merge/phpunit.xml
-  - ./bin/phpcov merge --clover ./build/logs/clover.xml ./build/merge
+  - ./bin/phpcov merge ./build/merge --clover ./build/logs/clover.xml
   - cat ./build/logs/clover.xml
 
 after_success:
