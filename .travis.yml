@@ -11,7 +11,7 @@ before_script:
 
 script:
   - ./bin/phpspec run
-  - ./bin/phpunit --coverage-clover build/logs/phpunit.xml
+  - ./bin/phpunit --coverage-clover build/logs/clover.xml
 
 after_success:
   - ./bin/coveralls -v
