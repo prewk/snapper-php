@@ -12,15 +12,10 @@ before_script:
 
 script:
   - composer test
-  - ls -la ./build/merge
-  - cat ./build/merge/phpunit.xml
-  - cat ./build/merge/phpspec.xml
   - ./bin/phpcov merge ./build/merge --clover ./build/logs/clover.xml
-  - ls -la ./build/logs
 
 after_success:
-  - cat ./build/logs/clover.xml
-  - travis_retry ./bin/coveralls -v
+  - ./bin/coveralls -v
 
 branches:
   only: master
