@@ -9,4 +9,4 @@ extensions:
     output:
       clover: build/merge/phpspec.xml
     whitelist:
-      - ./src
+      - src
