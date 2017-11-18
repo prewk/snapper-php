@@ -11,8 +11,7 @@ before_script:
     - mkdir -p build/logs
 
 script:
-  - ./bin/phpunit --coverage-clover build/merge/phpunit.xml
-  - ./bin/phpspec run
+  - composer test
   - ls -la ./build/merge
   - cat ./build/merge/phpunit.xml
   - cat ./build/merge/phpspec.xml
