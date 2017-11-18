@@ -15,7 +15,8 @@ script:
   - ./bin/phpcov merge --clover ./build/logs/clover.xml ./build/merge
 
 after_success:
-  - ./bin/coveralls -v
+  - pwd
+  - ./bin/coveralls -v -r .
 
 branches:
   only: master
