@@ -13,10 +13,11 @@ before_script:
 script:
   - ./bin/phpunit --coverage-clover build/merge/phpunit.xml
   - ./bin/phpspec run
+  - ls -la ./build/merge
   - ./bin/phpcov merge ./build/merge --clover ./build/logs/clover.xml
+  - ls -la ./build/logs
 
 after_success:
-  - rm -rf ./build/merge
   - cat ./build/logs/clover.xml
   - travis_retry ./bin/coveralls -v
 
