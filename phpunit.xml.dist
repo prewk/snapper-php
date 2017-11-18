@@ -13,12 +13,12 @@
 >
     <filter>
         <whitelist>
-            <directory>./src</directory>
+            <directory suffix=".php">src</directory>
         </whitelist>
     </filter>
     <testsuites>
         <testsuite name="Snapper Test Suite">
-            <directory suffix="Test.php">./tests/</directory>
+            <directory suffix="Test.php">tests</directory>
         </testsuite>
     </testsuites>
 </phpunit>

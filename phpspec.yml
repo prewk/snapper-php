@@ -1,7 +1,7 @@
 suites:
-    prewk_suite:
-        namespace: Prewk
-        psr4_prefix: Prewk
+  prewk_suite:
+    namespace: Prewk
+    psr4_prefix: Prewk
 extensions:
   LeanPHP\PhpSpec\CodeCoverage\CodeCoverageExtension:
     format:
@@ -9,4 +9,4 @@ extensions:
     output:
       clover: build/merge/phpspec.xml
     whitelist:
-      - src
+      - ./src
