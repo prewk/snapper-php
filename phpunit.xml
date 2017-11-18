@@ -11,6 +11,11 @@
          syntaxCheck="false"
          bootstrap="./vendor/autoload.php"
 >
+    <filter>
+        <whitelist>
+            <directory>./src</directory>
+        </whitelist>
+    </filter>
     <testsuites>
         <testsuite name="Snapper Test Suite">
             <directory suffix="Test.php">./tests/</directory>
