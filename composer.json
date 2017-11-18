@@ -13,9 +13,6 @@
       "email": "oskar.thornblad@gmail.com"
     }
   ],
-  "scripts": {
-    "test": "phpspec run && phpunit --coverage-clover build/merge/phpunit.xml"
-  },
   "autoload": {
     "psr-4": {
       "Prewk\\": "src/"

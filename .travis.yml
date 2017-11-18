@@ -11,7 +11,8 @@ before_script:
     - mkdir -p build/logs
 
 script:
-  - composer test
+  - ./bin/phpspec run
+  - ./bin/phpunit --coverage-clover build/merge/phpunit.xml
   - ./bin/phpcov merge --clover ./build/logs/clover.xml ./build/merge
 
 after_success:
