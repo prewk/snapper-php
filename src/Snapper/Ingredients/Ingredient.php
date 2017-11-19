@@ -9,13 +9,14 @@ declare(strict_types=1);
 
 namespace Prewk\Snapper\Ingredients;
 
+use JsonSerializable;
 use Prewk\Option;
 use Prewk\Snapper\BookKeeper;
 
 /**
  * Describes an Ingredient
  */
-interface Ingredient
+interface Ingredient extends JsonSerializable
 {
     /**
      * Get all dependencies of this ingredient
@@ -54,4 +55,12 @@ interface Ingredient
      * @return string[]
      */
     public function getRequiredExtraFields(): array;
+
+    /**
+     * Create an ingredient from an array, used for creating recipes from JSON
+     *
+     * @param array $config
+     * @return Ingredient
+     */
+    public static function fromArray(array $config): Ingredient;
 }

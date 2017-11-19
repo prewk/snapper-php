@@ -7,6 +7,7 @@ use PHPUnit\Framework\TestCase;
 use Prewk\Snapper\Deserializer\DeserializationBookKeeper;
 use Prewk\Snapper\Ingredients\Json\JsonRecipe;
 use Prewk\Snapper\Ingredients\Json\MatchedJson;
+use Prewk\Snapper\Ingredients\Json\PatternReplacer;
 use Prewk\Snapper\Ingredients\Json\TextReplacer;
 use Prewk\Snapper\Ingredients\Match\MatchMapper;
 use Prewk\Snapper\Ingredients\Morph\MorphMapper;
@@ -105,10 +106,8 @@ class SnapperIntegrationTest extends TestCase
                                 return $matched->ref("children")->optional(null);
                             })
                             ->pattern("/child$/", function(MatchedJson $matched) {
-                                return $matched->regexp("/<<\"(.*?)\">>/", function(TextReplacer $replacer, array $matches, string $replacement) {
-                                    list(, $id) = $matches;
-
-                                    return $replacer->replace("children", $id, "<<\"$id\">>", "<<\"$replacement\">>");
+                                return $matched->pattern("/<<\"(.*?)\">>/", function(PatternReplacer $replacer, string $replacement) {
+                                    return $replacer->replace("children", 1, "<<\"$replacement\">>");
                                 });
                             });
                     })

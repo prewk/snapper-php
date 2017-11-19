@@ -9,15 +9,17 @@ declare(strict_types=1);
 
 namespace Prewk\Snapper\Ingredients\Match;
 
+use JsonSerializable;
 use Prewk\Option;
 use Prewk\Option\{None, Some};
 use Prewk\Snapper\BookKeeper;
 use Prewk\Snapper\Ingredients\Ingredient;
+use Prewk\Snapper\Recipe;
 
 /**
  * MatchMapper
  */
-class MatchMapper
+class MatchMapper implements JsonSerializable
 {
     /**
      * @var array
@@ -167,5 +169,59 @@ class MatchMapper
             ->andThen(function(Ingredient $matched) use ($value, $row, $books) {
                 return $matched->deserialize($value, $row, $books);
             });
+    }
+
+    /**
+     * Specify data which should be serialized to JSON
+     * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
+     * @return mixed data which can be serialized by <b>json_encode</b>,
+     * which is a value of any type other than a resource.
+     * @since 5.4.0
+     */
+    public function jsonSerialize()
+    {
+        $on = [];
+        foreach ($this->on as $value => $ingredient) {
+            $on[$value] = $ingredient->jsonSerialize();
+        }
+
+        $patterns = [];
+        foreach ($this->patterns as $pattern => $ingredient) {
+            $patterns[$pattern] = $ingredient->jsonSerialize();
+        }
+
+        $default = isset($this->fallback) ? $this->fallback->jsonSerialize() : null;
+
+        return [
+            "field" => $this->field,
+            "on" => $on,
+            "patterns" => $patterns,
+            "default" => $default,
+        ];
+    }
+
+    /**
+     * Create a MatchMapper from an array, used for creating recipes from JSON
+     *
+     * @param array $config
+     * @return MatchMapper
+     */
+    public static function fromArray(array $config): MatchMapper
+    {
+        $mapper = new static($config["field"]);
+
+        foreach ($config["on"] as $value => $ingredient) {
+            $mapper->on($value, Recipe::ingredientFromArray($ingredient));
+        }
+
+        foreach ($config["patterns"] as $pattern => $ingredient) {
+            $mapper->pattern($pattern, Recipe::ingredientFromArray($ingredient));
+        }
+
+        if (isset($config["default"])) {
+            $mapper->default(Recipe::ingredientFromArray($config["default"]));
+        }
+
+        return $mapper;
     }
 }

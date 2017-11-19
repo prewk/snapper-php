@@ -10,6 +10,8 @@ declare(strict_types=1);
 namespace Prewk\Snapper;
 
 use Closure;
+use JsonSerializable;
+use Prewk\Snapper\Exceptions\RecipeException;
 use Prewk\Snapper\Ingredients\Circular;
 use Prewk\Snapper\Ingredients\Ingredient;
 use Prewk\Snapper\Ingredients\Json;
@@ -22,7 +24,7 @@ use Prewk\Snapper\Ingredients\Value;
 /**
  * Recipe
  */
-class Recipe
+class Recipe implements JsonSerializable
 {
     /**
      * @var string
@@ -143,5 +145,67 @@ class Recipe
     public function getPrimaryKey(): string
     {
         return $this->primaryKey;
+    }
+
+    /**
+     * Create a recipe from an array
+     *
+     * @param array $recipe
+     * @return Recipe
+     */
+    public static function fromArray(array $recipe): Recipe
+    {
+        $primaryKey = $recipe["primary_key"];
+        $ingredients = array_map(function(array $ingredient) {
+            return static::ingredientFromArray($ingredient);
+        }, $recipe["ingredients"]);
+
+        return new static($primaryKey, $ingredients);
+    }
+
+    /**
+     * Create an Ingredient from an array
+     *
+     * @param array $ingredient
+     * @return Ingredient
+     * @throws RecipeException
+     */
+    public static function ingredientFromArray(array $ingredient): Ingredient
+    {
+        switch ($ingredient["type"]) {
+            case "VALUE":
+                return Value::fromArray($ingredient["config"]);
+            case "REF":
+                return Ref::fromArray($ingredient["config"]);
+            case "RAW":
+                return Raw::fromArray($ingredient["config"]);
+            case "MORPH":
+                return Morph::fromArray($ingredient["config"]);
+            case "MATCH":
+                return Match::fromArray($ingredient["config"]);
+            case "JSON":
+                return Json::fromArray($ingredient["config"]);
+            case "CIRCULAR":
+                return Circular::fromArray($ingredient["config"]);
+            default:
+                throw new RecipeException("Can't create ingredient from invalid type: " . $ingredient["type"]);
+        }
+    }
+
+    /**
+     * Specify data which should be serialized to JSON
+     * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
+     * @return mixed data which can be serialized by <b>json_encode</b>,
+     * which is a value of any type other than a resource.
+     * @since 5.4.0
+     */
+    public function jsonSerialize()
+    {
+        return [
+            "primary_key" => $this->primaryKey ?? null,
+            "ingredients" => array_map(function(Ingredient $ingredient) {
+                return $ingredient->jsonSerialize();
+            }, $this->ingredients),
+        ];
     }
 }

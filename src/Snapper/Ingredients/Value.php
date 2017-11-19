@@ -12,6 +12,7 @@ namespace Prewk\Snapper\Ingredients;
 use Prewk\Option;
 use Prewk\Option\Some;
 use Prewk\Snapper\BookKeeper;
+use stdClass;
 
 /**
  * Value
@@ -66,5 +67,31 @@ class Value implements Ingredient
     public function getRequiredExtraFields(): array
     {
         return [];
+    }
+
+    /**
+     * Specify data which should be serialized to JSON
+     * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
+     * @return mixed data which can be serialized by <b>json_encode</b>,
+     * which is a value of any type other than a resource.
+     * @since 5.4.0
+     */
+    public function jsonSerialize()
+    {
+        return [
+            "type" => "VALUE",
+            "config" => new stdClass,
+        ];
+    }
+
+    /**
+     * Create an ingredient from an array, used for creating recipes from JSON
+     *
+     * @param array $config
+     * @return Ingredient
+     */
+    public static function fromArray(array $config): Ingredient
+    {
+        return new static;
     }
 }

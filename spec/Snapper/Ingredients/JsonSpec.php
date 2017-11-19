@@ -8,7 +8,7 @@ use Prewk\Snapper\Ingredients\Json;
 use PhpSpec\ObjectBehavior;
 use Prewk\Snapper\Ingredients\Json\JsonRecipe;
 use Prewk\Snapper\Ingredients\Json\MatchedJson;
-use Prewk\Snapper\Ingredients\Json\TextReplacer;
+use Prewk\Snapper\Ingredients\Json\PatternReplacer;
 use Prophecy\Argument;
 
 class JsonSpec extends ObjectBehavior
@@ -48,9 +48,9 @@ class JsonSpec extends ObjectBehavior
                 })
                 ->path("baz.baz_id", function(MatchedJson $matched) {
                     return $matched
-                        ->regexp("/id:(\\d+)/", function(TextReplacer $replacer, array $match, string $replacement) {
+                        ->pattern("/id:<(.*?)>/", function(PatternReplacer $replacer, string $replacement) {
                             return $replacer
-                                ->replace("bazes", intval($match[1]), "id:$match[1]", "id:$replacement");
+                                ->replace("bazes", 1, "id:<$replacement>");
                         });
                 })
                 ->pattern("/qux/", function(MatchedJson $matched) {
@@ -62,15 +62,15 @@ class JsonSpec extends ObjectBehavior
         $value = json_encode([
             "foo" => ["foo_id" => 1],
             "bar" => ["bar_id" => null],
-            "baz" => ["baz_id" => "Lorem id:2 ipsum id:3"],
+            "baz" => ["baz_id" => "Lorem id:<2> ipsum id:<3>"],
             "a_qux_a" => 4,
             "b_qux_b" => 5,
         ], JSON_UNESCAPED_SLASHES);
 
         $this->getDeps($value, ["value" => $value], false)->shouldBe([
             ["foos", 1],
-            ["bazes", 2],
-            ["bazes", 3],
+            ["bazes", "2"],
+            ["bazes", "3"],
             ["quxes", 4],
             ["quxes", 5],
         ]);
@@ -90,9 +90,9 @@ class JsonSpec extends ObjectBehavior
                 })
                 ->path("baz.baz_id", function(MatchedJson $matched) {
                     return $matched
-                        ->regexp("/id:(\\d+)/", function(TextReplacer $replacer, array $match, string $replacement) {
+                        ->pattern("/id:<(\\d+)>/", function(PatternReplacer $replacer, string $replacement) {
                             return $replacer
-                                ->replace("bazes", intval($match[1]), "id:$match[1]", "id:$replacement");
+                                ->replace("bazes", 1, "id:<$replacement>");
                         });
                 })
                 ->pattern("/qux/", function(MatchedJson $matched) {
@@ -104,7 +104,7 @@ class JsonSpec extends ObjectBehavior
         $value = json_encode([
             "foo" => ["foo_id" => 1],
             "bar" => ["bar_id" => null],
-            "baz" => ["baz_id" => "Lorem id:2 ipsum id:3"],
+            "baz" => ["baz_id" => "Lorem id:<2> ipsum id:<3>"],
             "a_qux_a" => 4,
             "b_qux_b" => 5,
         ], JSON_UNESCAPED_SLASHES);
@@ -118,7 +118,7 @@ class JsonSpec extends ObjectBehavior
         $this->serialize($value, ["value" => $value], $books, false)->unwrap()->shouldBe(json_encode([
             "foo" => ["foo_id" => "PARSED_1"],
             "bar" => ["bar_id" => null],
-            "baz" => ["baz_id" => "Lorem id:PARSED_2 ipsum id:PARSED_3"],
+            "baz" => ["baz_id" => "Lorem id:<PARSED_2> ipsum id:<PARSED_3>"],
             "a_qux_a" => "PARSED_4",
             "b_qux_b" => "PARSED_5",
         ], JSON_UNESCAPED_SLASHES));
@@ -138,9 +138,9 @@ class JsonSpec extends ObjectBehavior
                 })
                 ->path("baz.baz_id", function(MatchedJson $matched) {
                     return $matched
-                        ->regexp("/id:<(.*?)>/", function(TextReplacer $replacer, array $match, string $replacement) {
+                        ->pattern("/id:<(.*?)>/", function(PatternReplacer $replacer, string $replacement) {
                             return $replacer
-                                ->replace("bazes", $match[1], "id:<$match[1]>", "id:<$replacement>");
+                                ->replace("bazes", 1, "id:<$replacement>");
                         });
                 })
                 ->pattern("/qux/", function(MatchedJson $matched) {

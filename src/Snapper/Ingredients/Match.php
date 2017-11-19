@@ -124,4 +124,36 @@ class Match implements Ingredient
     {
         return [$this->field];
     }
+
+    /**
+     * Create an ingredient from an array, used for creating recipes from JSON
+     *
+     * @param array $config
+     * @return Ingredient
+     */
+    public static function fromArray(array $config): Ingredient
+    {
+        return new static($config["field"], MatchMapper::fromArray($config["matcher"]));
+    }
+
+    /**
+     * Specify data which should be serialized to JSON
+     * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
+     * @return mixed data which can be serialized by <b>json_encode</b>,
+     * which is a value of any type other than a resource.
+     * @since 5.4.0
+     */
+    function jsonSerialize()
+    {
+        $closure = $this->matcher;
+        $matchMapper = $closure(new MatchMapper($this->field));
+
+        return [
+            "type" => "MATCH",
+            "config" => [
+                "field" => $this->field,
+                "matcher" => $matchMapper->jsonSerialize(),
+            ],
+        ];
+    }
 }

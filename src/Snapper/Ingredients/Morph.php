@@ -154,4 +154,36 @@ class Morph implements Ingredient
     {
         return [$this->field];
     }
+
+    /**
+     * Create an ingredient from an array, used for creating recipes from JSON
+     *
+     * @param array $config
+     * @return Ingredient
+     */
+    public static function fromArray(array $config): Ingredient
+    {
+        return new static($config["field"], MorphMapper::fromArray($config["morph_mapper"]));
+    }
+
+    /**
+     * Specify data which should be serialized to JSON
+     * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
+     * @return mixed data which can be serialized by <b>json_encode</b>,
+     * which is a value of any type other than a resource.
+     * @since 5.4.0
+     */
+    public function jsonSerialize()
+    {
+        $closure = $this->morphMapper;
+        $morphMapper = $closure(new MorphMapper);
+
+        return [
+            "type" => "MORPH",
+            "config" => [
+                "field" => $this->field,
+                "morph_mapper" => $morphMapper->jsonSerialize(),
+            ],
+        ];
+    }
 }

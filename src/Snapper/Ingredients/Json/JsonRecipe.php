@@ -11,6 +11,7 @@ namespace Prewk\Snapper\Ingredients\Json;
 
 use Closure;
 use Illuminate\Support\Arr;
+use JsonSerializable;
 use Prewk\Option;
 use Prewk\Option\{None, Some};
 use Prewk\Snapper\BookKeeper;
@@ -19,7 +20,7 @@ use Prewk\Snapper\Exceptions\RecipeException;
 /**
  * JsonRecipe
  */
-class JsonRecipe
+class JsonRecipe implements JsonSerializable
 {
     /**
      * @var array
@@ -151,5 +152,53 @@ class JsonRecipe
         }
 
         return new Some(json_encode($decoded, JSON_UNESCAPED_SLASHES));
+    }
+
+    /**
+     * Specify data which should be serialized to JSON
+     * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
+     * @return mixed data which can be serialized by <b>json_encode</b>,
+     * which is a value of any type other than a resource.
+     * @since 5.4.0
+     */
+    function jsonSerialize()
+    {
+        $paths = [];
+        foreach ($this->paths as $path => $handler) {
+            $matchedJson = $handler(new MatchedJson);
+            $paths[$path] = $matchedJson->jsonSerialize();
+        }
+
+        $patterns = [];
+        foreach ($this->patterns as $pattern => $handler) {
+            $matchedJson = $handler(new MatchedJson);
+            $patterns[$pattern] = $matchedJson->jsonSerialize();
+        }
+
+        return [
+            "paths" => $paths,
+            "patterns" => $patterns,
+        ];
+    }
+
+    /**
+     * Create a JsonRecipe from an array, used for creating recipes from JSON
+     *
+     * @param array $config
+     * @return JsonRecipe
+     */
+    public static function fromArray(array $config): JsonRecipe
+    {
+        $json = new static;
+
+        foreach ($config["paths"] as $path => $handler) {
+            $json->path($path, MatchedJson::fromArray($handler));
+        }
+
+        foreach ($config["patterns"] as $pattern => $handler) {
+            $json->pattern($pattern, MatchedJson::fromArray($handler));
+        }
+
+        return $json;
     }
 }
