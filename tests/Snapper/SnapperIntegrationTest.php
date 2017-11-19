@@ -2,6 +2,7 @@
 
 namespace Prewk\Snapper;
 
+use JsonSchema\Validator as JsonValidator;
 use PDO;
 use PHPUnit\Framework\TestCase;
 use Prewk\Snapper\Deserializer\DeserializationBookKeeper;
@@ -140,7 +141,7 @@ class SnapperIntegrationTest extends TestCase
         return $items;
     }
 
-    public function test_validator()
+    public function test_reference_validator()
     {
         $recipes = $this->getTestRecipes();
         $testRows = $this->getTestRows();
@@ -162,6 +163,24 @@ class SnapperIntegrationTest extends TestCase
 
         // This serialization shouldn't validate
         $this->assertFalse($validator->validate($serialization));
+    }
+
+    public function test_schema_validator()
+    {
+        $json = json_encode($this->getTestRecipes());
+        $decoded = json_decode($json);
+
+        $validator = new SchemaValidator(new JsonValidator);
+
+        // This schema should validate
+        $this->assertTrue($validator->validate($decoded->roots)->isOk());
+        $this->assertTrue($validator->validate($decoded->nodes)->isOk());
+        $this->assertTrue($validator->validate($decoded->polys)->isOk());
+        $this->assertTrue($validator->validate($decoded->children)->isOk());
+
+        // Break it
+        $decoded->roots->ingredients->name->type = "REF";
+        $this->assertTrue($validator->validate($decoded->roots)->isErr());
     }
 
     public function test_full_recipe()

@@ -25,7 +25,10 @@
     "illuminate/support": "5.2.*",
     "marcj/topsort": "^1.1",
     "ramsey/uuid": "^3.7",
-    "prewk/option": "^1.0"
+    "prewk/option": "^1.0",
+    "prewk/snapper-schema": "2.1.1",
+    "justinrainbow/json-schema": "^5.2",
+    "prewk/result": "^1.0"
   },
   "require-dev": {
     "symfony/var-dumper": "^3.3",

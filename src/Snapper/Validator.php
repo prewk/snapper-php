@@ -10,7 +10,10 @@ declare(strict_types=1);
 namespace Prewk\Snapper;
 
 use Exception;
+use JsonSchema\Validator as JsonValidator;
 use Prewk\Snapper\Deserializer\DeserializationBookKeeper;
+use Prewk\SnapperSchema\SchemaProvider;
+use stdClass;
 
 /**
  * Validator
@@ -28,7 +31,8 @@ class Validator extends Deserializer
     private $bookKeeper;
 
     /**
-     * Validator constructor.
+     * Validator constructor
+     *
      * @param DeserializationBookKeeper $bookKeeper
      * @param array $recipes
      */
@@ -38,6 +42,7 @@ class Validator extends Deserializer
         $updaters = $this->makeUpdaters($recipes);
 
         $this->bookKeeper = $bookKeeper;
+
         parent::__construct($bookKeeper, $recipes, $inserters, $updaters);
     }
 
