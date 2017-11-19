@@ -290,19 +290,15 @@ use \Prewk\Snapper\Ingredients\Json;
       ->path("content", function(Json\MatchedJson $matched) {
         return $matched
           // Match { "content": "Lorem ipsum qux:=123= dolor qux:=456= amet" }
-          ->regexp("qux:=(.*?)=", function(
-            Json\TextReplacer $replacer,
-            array $matches,
+          ->pattern("qux:=(.*?)=", function(
+            Json\PatternReplacer $replacer,
             string $replacement
           ) {
             // Here we tell the recipe about what references we found and
             // teach it to search and replace them
-            list (, $id) = $matches;
-            
             return $replacer->replace(
               "quxes",
-              $id,
-              "qux:=$id=",
+              1, // Refers to the index of the resulting preg, so: $matches[1]
               "qux:=$replacement="
             );
           });
@@ -429,6 +425,58 @@ $deserializer
   ->setRecipe("foos", $fooRecipe)
   ->setInserter("foos", $fooInserter)
   ->setUpdater("foos", $fooUpdater);
+```
+
+## Recipe JSON
+
+Recipes can be converted to/from JSON which can be useful.
+
+```php
+<?php
+use Prewk\Snapper;
+
+$someRecipe = $r->primary("id")->ingredients(["name" => $r->value()]);
+
+$json = json_encode($someRecipe);
+
+file_put_contents("recipe.json", $json);
+
+$json = file_get_contents("recipe.json");
+
+// Note: decode to associative array
+$someRecipe = Snapper\Recipe::fromArray(json_decode($json, true));
+```
+
+## Validation
+
+### Validate a serialization
+
+Check a serialization for unresolvable references
+
+```php
+<?php
+use Prewk\Snapper;
+
+$validator = new Snapper\Validator(new DeserializationBookKeeper, $recipes);
+
+$isValid = $validator->validate($serialization);
+```
+
+### Validate a JSON recipe
+
+Recipes can be validated with a JSON schema validator.
+
+```php
+<?php
+use Prewk\Snapper;
+use JsonSchema\Validator as JsonValidator; // https://github.com/justinrainbow/json-schema
+
+$validator = new Snapper\SchemaValidator(new JsonValidator);
+
+$json = file_get_contents("recipe.json");
+
+// Note: don't decode to associative array
+$validator->validate(json_decode($json));
 ```
 
 ## Why?
