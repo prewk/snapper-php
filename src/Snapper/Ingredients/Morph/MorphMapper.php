@@ -95,7 +95,7 @@ class MorphMapper implements JsonSerializable
     public function fromArray(array $config): MorphMapper
     {
         $mapper = (new static);
-        foreach ($config["morph_mapper"] as $from => $to) {
+        foreach ($config["morph_map"] as $from => $to) {
             $mapper->map($from, $to);
         }
 
