@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "e047c9a48264001de0a1423d253e6dd2",
+    "content-hash": "7fe9b016da5430fc40ed3ea898f21ce7",
     "packages": [
         {
             "name": "doctrine/inflector",
@@ -175,72 +175,6 @@
             "time": "2016-08-05T14:49:58+00:00"
         },
         {
-            "name": "justinrainbow/json-schema",
-            "version": "5.2.6",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/justinrainbow/json-schema.git",
-                "reference": "d283e11b6e14c6f4664cf080415c4341293e5bbd"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/justinrainbow/json-schema/zipball/d283e11b6e14c6f4664cf080415c4341293e5bbd",
-                "reference": "d283e11b6e14c6f4664cf080415c4341293e5bbd",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.3"
-            },
-            "require-dev": {
-                "friendsofphp/php-cs-fixer": "^2.1",
-                "json-schema/json-schema-test-suite": "1.2.0",
-                "phpunit/phpunit": "^4.8.22"
-            },
-            "bin": [
-                "bin/validate-json"
-            ],
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "5.0.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "JsonSchema\\": "src/JsonSchema/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Bruno Prieto Reis",
-                    "email": "bruno.p.reis@gmail.com"
-                },
-                {
-                    "name": "Justin Rainbow",
-                    "email": "justin.rainbow@gmail.com"
-                },
-                {
-                    "name": "Igor Wiedler",
-                    "email": "igor@wiedler.ch"
-                },
-                {
-                    "name": "Robert Schönthal",
-                    "email": "seroscho@googlemail.com"
-                }
-            ],
-            "description": "A library to validate a json schema.",
-            "homepage": "https://github.com/justinrainbow/json-schema",
-            "keywords": [
-                "json",
-                "schema"
-            ],
-            "time": "2017-10-21T13:15:38+00:00"
-        },
-        {
             "name": "marcj/topsort",
             "version": "1.1.0",
             "source": {
@@ -337,16 +271,16 @@
         },
         {
             "name": "prewk/option",
-            "version": "1.0.2",
+            "version": "1.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/prewk/option.git",
-                "reference": "1d61ee4bcf132bd122bcf3ddf265cfb1e1ad858e"
+                "reference": "f6ac3ae23153d4d410a0109bb95784746c580f4b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/prewk/option/zipball/1d61ee4bcf132bd122bcf3ddf265cfb1e1ad858e",
-                "reference": "1d61ee4bcf132bd122bcf3ddf265cfb1e1ad858e",
+                "url": "https://api.github.com/repos/prewk/option/zipball/f6ac3ae23153d4d410a0109bb95784746c580f4b",
+                "reference": "f6ac3ae23153d4d410a0109bb95784746c580f4b",
                 "shasum": ""
             },
             "require": {
@@ -375,7 +309,7 @@
                 }
             ],
             "description": "Option object for PHP inspired by Rust",
-            "time": "2017-09-04T07:38:58+00:00"
+            "time": "2017-11-20T15:31:21+00:00"
         },
         {
             "name": "prewk/result",
@@ -682,6 +616,72 @@
             ],
             "abandoned": "guzzlehttp/guzzle",
             "time": "2014-01-28T22:29:15+00:00"
+        },
+        {
+            "name": "justinrainbow/json-schema",
+            "version": "5.2.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/justinrainbow/json-schema.git",
+                "reference": "d283e11b6e14c6f4664cf080415c4341293e5bbd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/justinrainbow/json-schema/zipball/d283e11b6e14c6f4664cf080415c4341293e5bbd",
+                "reference": "d283e11b6e14c6f4664cf080415c4341293e5bbd",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^2.1",
+                "json-schema/json-schema-test-suite": "1.2.0",
+                "phpunit/phpunit": "^4.8.22"
+            },
+            "bin": [
+                "bin/validate-json"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "5.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "JsonSchema\\": "src/JsonSchema/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Bruno Prieto Reis",
+                    "email": "bruno.p.reis@gmail.com"
+                },
+                {
+                    "name": "Justin Rainbow",
+                    "email": "justin.rainbow@gmail.com"
+                },
+                {
+                    "name": "Igor Wiedler",
+                    "email": "igor@wiedler.ch"
+                },
+                {
+                    "name": "Robert Schönthal",
+                    "email": "seroscho@googlemail.com"
+                }
+            ],
+            "description": "A library to validate a json schema.",
+            "homepage": "https://github.com/justinrainbow/json-schema",
+            "keywords": [
+                "json",
+                "schema"
+            ],
+            "time": "2017-10-21T13:15:38+00:00"
         },
         {
             "name": "myclabs/deep-copy",

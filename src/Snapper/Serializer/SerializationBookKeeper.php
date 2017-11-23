@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Prewk\Snapper\Serializer;
 
+use Prewk\Option;
 use Prewk\Snapper\BookKeeper;
 use Ramsey\Uuid\Uuid;
 
@@ -35,6 +36,20 @@ class SerializationBookKeeper implements BookKeeper
     protected function pair(string $type, $id): string
     {
         return "$type/$id";
+    }
+
+    /**
+     * Get pair by uuid
+     *
+     * @param string $uuid
+     * @return Option Option<[type, id]>
+     */
+    public function getPairByUuid(string $uuid): Option
+    {
+        return Option\From::key($this->pairById, $uuid)
+            ->map(function(string $pairStr) {
+                return explode("/", $pairStr);
+            });
     }
 
     /**

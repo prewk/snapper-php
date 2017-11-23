@@ -10,7 +10,11 @@ declare(strict_types=1);
 namespace Prewk\Snapper;
 
 use Closure;
+use MJS\TopSort\ElementNotFoundException;
+use Prewk\Result;
+use Prewk\Result\Ok;
 use Prewk\Snapper;
+use Prewk\Snapper\Exceptions\IntegrityException;
 use Prewk\Snapper\Exceptions\RecipeException;
 use Prewk\Snapper\Ingredients\Circular;
 use Prewk\Snapper\Serializer\Events\OnInsert;
@@ -212,20 +216,50 @@ class Serializer
         };
     }
 
+    protected function sort(Sorter $sorter): array
+    {
+        try {
+            $ordered = $sorter->sort();
+        } catch (ElementNotFoundException $e) {
+            $sourceUuid = $e->getSource();
+            $targetUuid = $e->getTarget();
+
+            $source = $this->bookKeeper->getPairByUuid($sourceUuid);
+            $target = $this->bookKeeper->getPairByUuid($targetUuid);
+
+            if ($source->isSome() && $target->isSome()) {
+                list($sourceType, $sourceId) = $source->unwrap();
+                list($targetType, $targetId) = $target->unwrap();
+                throw new IntegrityException("A row ($sourceType/$sourceId) required a missing row ($targetType/$targetId)");
+            } else if ($source->isSome()) {
+                list($sourceType, $sourceId) = $source->unwrap();
+                throw new IntegrityException("A row ($sourceType/$sourceId) required a missing unknown row");
+            } else if ($target->isSome()) {
+                list($targetType, $targetId) = $target->unwrap();
+                throw new IntegrityException("An unknown row required a row ($targetType/$targetId)");
+            } else {
+                throw new IntegrityException("Encountered an unknown row with another unknown row as dependency");
+            }
+        }
+
+        return $ordered;
+    }
+
     /**
      * Turn the added rows into a sequence of operations
      *
      * @return array
+     * @throws IntegrityException
      */
     public function compile(): array
     {
-        $order = $this->sorter->sort();
+        $order = $this->sort($this->sorter);
 
         foreach ($this->circularRows as $uuid => $item) {
             $this->circularSorter->add($uuid, $item["deps"]);
         }
 
-        $circularOrder = array_values(array_filter($this->circularSorter->sort(), function(string $uuid) {
+        $circularOrder = array_values(array_filter($this->sort($this->circularSorter), function(string $uuid) {
             return array_key_exists($uuid, $this->circularRows);
         }));
 

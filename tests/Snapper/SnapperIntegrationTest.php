@@ -195,7 +195,6 @@ class SnapperIntegrationTest extends TestCase
         }
 
         $serialization = $serializer->compile();
-
         $db = $this->getMemoryDb();
 
         $inserters = [

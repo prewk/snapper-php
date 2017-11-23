@@ -25,7 +25,7 @@
     "illuminate/support": "5.2.*",
     "marcj/topsort": "^1.1",
     "ramsey/uuid": "^3.7",
-    "prewk/option": "^1.0",
+    "prewk/option": "^1.1",
     "prewk/snapper-schema": "2.1.1",
     "prewk/result": "^1.0"
   },
