@@ -5,6 +5,7 @@ namespace Prewk\Snapper;
 use JsonSchema\Validator as JsonValidator;
 use PDO;
 use PHPUnit\Framework\TestCase;
+use Prewk\Snapper;
 use Prewk\Snapper\Deserializer\DeserializationBookKeeper;
 use Prewk\Snapper\Ingredients\Json\JsonRecipe;
 use Prewk\Snapper\Ingredients\Json\MatchedJson;
@@ -181,6 +182,36 @@ class SnapperIntegrationTest extends TestCase
         // Break it
         $decoded->roots->ingredients->name->type = "REF";
         $this->assertTrue($validator->validate($decoded->roots)->isErr());
+    }
+
+    public function test_analyzer()
+    {
+        $polys = $this->getTestRecipes()["polys"];
+
+        $snapper = new Snapper(new Sorter, new SerializationBookKeeper, new DeserializationBookKeeper);
+
+        $stats = $snapper->analyze($polys, [
+            "id" => 1,
+            "polyable_type" => "NODE",
+            "polyable_id" => 2,
+            "json" => json_encode([
+                "deep" => [
+                    "child_id" => 3
+                ],
+                "foo_child" => 'Lorem <<"4">> ipsum dolor amet <<"5">>',
+                "bar_child" => 'Lorem ipsum <<"6">> dolor <<"7">> amet',
+            ], JSON_UNESCAPED_SLASHES),
+        ]);
+
+        $this->assertCount(6, $stats["deps"]);
+        $this->assertContains(["nodes", "2"], $stats["deps"]);
+        $this->assertContains(["children", 3], $stats["deps"]);
+        $this->assertContains(["children", "4"], $stats["deps"]);
+        $this->assertContains(["children", "5"], $stats["deps"]);
+        $this->assertContains(["children", "6"], $stats["deps"]);
+        $this->assertContains(["children", "7"], $stats["deps"]);
+        $this->assertEquals(1, $stats["primary"]);
+        $this->assertEquals([], $stats["missingFields"]);
     }
 
     public function test_full_recipe()
