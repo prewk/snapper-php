@@ -22,7 +22,7 @@
     "bin-dir": "bin"
   },
   "require": {
-    "illuminate/support": "5.2.*",
+    "illuminate/support": "5.*",
     "marcj/topsort": "^1.1",
     "ramsey/uuid": "^3.7",
     "prewk/option": "^1.1",
