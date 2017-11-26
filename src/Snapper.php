@@ -26,10 +26,12 @@ class Snapper
      * @var Sorter
      */
     private $sorter;
+
     /**
      * @var SerializationBookKeeper
      */
     private $serializationBookKeeper;
+
     /**
      * @var DeserializationBookKeeper
      */
