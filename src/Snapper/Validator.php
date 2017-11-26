@@ -10,10 +10,7 @@ declare(strict_types=1);
 namespace Prewk\Snapper;
 
 use Exception;
-use JsonSchema\Validator as JsonValidator;
 use Prewk\Snapper\Deserializer\DeserializationBookKeeper;
-use Prewk\SnapperSchema\SchemaProvider;
-use stdClass;
 
 /**
  * Validator
@@ -56,8 +53,12 @@ class Validator extends Deserializer
     {
         $inserters = [];
         foreach ($recipes as $field => $_) {
-            $inserters[$field] = function($row) {
-                return ++$this->fakeIdCnt;
+            $inserters[$field] = function(array $rows) {
+                $ids = [];
+                foreach ($rows as $_) {
+                    $ids[] = ++$this->fakeIdCnt;
+                }
+                return $ids;
             };
         }
         return $inserters;
@@ -87,7 +88,6 @@ class Validator extends Deserializer
     public function validate(array $serialization): bool
     {
         $this->bookKeeper->reset();
-
         try {
             $this->deserialize($serialization);
 

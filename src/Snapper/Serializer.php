@@ -11,8 +11,6 @@ namespace Prewk\Snapper;
 
 use Closure;
 use MJS\TopSort\ElementNotFoundException;
-use Prewk\Result;
-use Prewk\Result\Ok;
 use Prewk\Snapper;
 use Prewk\Snapper\Exceptions\IntegrityException;
 use Prewk\Snapper\Exceptions\RecipeException;
@@ -190,8 +188,10 @@ class Serializer
         }
 
         $this->rows[$uuid] = [
+            "deps" => $deps,
             "row" => $resolvedRow,
             "type" => $type,
+            "uuid" => $uuid,
         ];
 
         $this->sorter->add($uuid, $deps);
@@ -246,6 +246,118 @@ class Serializer
     }
 
     /**
+     * Convert an ordered dependency tree into UPDATE ops
+     *
+     * @param array $ordered
+     * @return array
+     */
+    protected function toUpdateOps(array $ordered): array
+    {
+        $ops = [];
+        $batch = [];
+        $lastType = "";
+        $lastFieldHash = "";
+
+        foreach ($ordered as $uuid) {
+            $item = $this->circularRows[$uuid];
+            $type = $item["type"];
+
+            // Create a hash of the order and names of fields
+            $fieldHash = implode("/", array_keys($item));
+
+            if ($type !== $lastType || $fieldHash !== $lastFieldHash) {
+                // Start a new batch
+                if (!empty($batch)) $ops[] = $this->itemsToBatchedOp(Snapper::UPDATE, $lastType, $batch);
+                $batch = [];
+            }
+
+            // Add item to batch
+            $batch[] = $item;
+            $lastType = $type;
+            $lastFieldHash = $fieldHash;
+        }
+
+        // Empty the last of the batch into ops
+        if (!empty($batch)) $ops[] = $this->itemsToBatchedOp(Snapper::UPDATE, $lastType, $batch);
+
+        return $ops;
+    }
+
+    /**
+     * Convert an array of items into one batched INSERT op
+     *
+     * @param string $op
+     * @param string $type
+     * @param array $items
+     * @return array
+     */
+    protected function itemsToBatchedOp(string $op, string $type, array $items): array
+    {
+        return [
+            "op" => $op,
+            "type" => $type,
+            "rows" => array_map(function(array $item) {
+                return $item["row"];
+            }, $items),
+        ];
+    }
+
+    /**
+     * Convert an ordered dependency tree into batched INSERT ops
+     *
+     * @param array $ordered
+     * @return array
+     */
+    protected function toInsertOps(array $ordered): array
+    {
+        $ops = [];
+        $batch = [];
+        $lastType = "";
+        $lastFieldHash = "";
+
+        foreach ($ordered as $uuid) {
+            $item = $this->rows[$uuid];
+            $deps = $item["deps"];
+            $type = $item["type"];
+
+            // Create a hash of the order and names of fields
+            $fieldHash = implode("/", array_keys($item));
+
+            if ($type === $lastType && $fieldHash === $lastFieldHash) {
+                // Gather all uuids so far in the batch
+                $uuidsInBatch = array_map(function (array $item) {
+                    return $item["uuid"];
+                }, $batch);
+
+                // Check for intradependencies
+                foreach ($deps as $dep) {
+                    $depItem = $this->rows[$dep];
+                    if ($depItem["type"] === $type && in_array($dep, $uuidsInBatch)) {
+                        // Nope, this item has intradependencies - New batch
+                        if (!empty($batch)) $ops[] = $this->itemsToBatchedOp(Snapper::INSERT, $type, $batch);
+                        $batch = [];
+                        break;
+                    }
+                }
+            } else {
+                // New type - Start a new batch
+                if (!empty($batch)) $ops[] = $this->itemsToBatchedOp(Snapper::INSERT, $lastType, $batch);
+                $batch = [];
+            }
+
+            // Add item to batch
+            $batch[] = $item;
+            $lastType = $type;
+            $lastFieldHash = $fieldHash;
+        }
+
+        // Empty the last of the batch into ops
+        if (!empty($batch)) $ops[] = $this->itemsToBatchedOp(Snapper::INSERT, $lastType, $batch);
+
+        return $ops;
+    }
+
+    /**
      * Turn the added rows into a sequence of operations
      *
      * @return array
@@ -263,25 +375,6 @@ class Serializer
             return array_key_exists($uuid, $this->circularRows);
         }));
 
-        return array_merge(
-            array_map(function(string $uuid) {
-                $item = $this->rows[$uuid];
-
-                return [
-                    "op" => Snapper::INSERT,
-                    "type" => $item["type"],
-                    "row" => $item["row"],
-                ];
-            }, $order),
-            array_map(function(string $uuid) {
-                $item = $this->circularRows[$uuid];
-
-                return [
-                    "op" => Snapper::UPDATE,
-                    "type" => $item["type"],
-                    "row" => $item["row"],
-                ];
-            }, $circularOrder)
-        );
+        return array_merge($this->toInsertOps($order), $this->toUpdateOps($circularOrder));
     }
 }

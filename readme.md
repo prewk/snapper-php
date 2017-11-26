@@ -33,36 +33,38 @@ Converts rows from a relational database into serialization snapshots that can b
 [
   "op" => "INSERT",
   "type" => "parents",
-  "row" => [
-    "id" => "dee78c67-7c0b-4750-9f44-414f5a45006f",
-    "name" => "The parent",
-    "favorite_child" => null
+  "rows" => [ 
+    [
+      "id" => "dee78c67-7c0b-4750-9f44-414f5a45006f",
+      "name" => "The parent",
+      "favorite_child" => null
+    ]
   ]
 ],
 [
   "op" => "INSERT",
   "type" => "children",
-  "row" => [
-    "id" => "3d228dca-11e2-43ec-bb03-ea4dace489f7",
-    "parent_id" => "dee78c67-7c0b-4750-9f44-414f5a45006f",
-    "description" => "I'm child A"
-  ]
-],
-[
-  "op" => "INSERT",
-  "type" => "children",
-  "row" => [
-    "id" => "9eebf63a-69a5-42c7-b1fb-81a5e2058ec9",
-    "parent_id" => "dee78c67-7c0b-4750-9f44-414f5a45006f",
-    "description" => "I'm child B"
+  "rows" => [
+    [
+      "id" => "3d228dca-11e2-43ec-bb03-ea4dace489f7",
+      "parent_id" => "dee78c67-7c0b-4750-9f44-414f5a45006f",
+      "description" => "I'm child A"
+    ],
+    [
+      "id" => "9eebf63a-69a5-42c7-b1fb-81a5e2058ec9",
+      "parent_id" => "dee78c67-7c0b-4750-9f44-414f5a45006f",
+      "description" => "I'm child B"
+    ]    
   ]
 ],
 [
   "op" => "UPDATE",
   "type" => "parents",
-  "row" => [
-    "id" => "dee78c67-7c0b-4750-9f44-414f5a45006f",
-    "favorite_child" => "9eebf63a-69a5-42c7-b1fb-81a5e2058ec9"
+  "rows" => [
+    [
+      "id" => "dee78c67-7c0b-4750-9f44-414f5a45006f",
+      "favorite_child" => "9eebf63a-69a5-42c7-b1fb-81a5e2058ec9"
+    ]
   ]
 ]
 ```
@@ -146,34 +148,48 @@ use Prewk\Snapper;
 
 // Create inserters
 $inserters = [
-  "parents" => function(array $row) use ($dbh) {
-    $stmt = $dbh->prepare("INSERT INTO parents (name, favorite_child) VALUES (:name, :favorite_child)");
-    $stmt->execute([
-      ":name" => $row["name"],
-      ":favorite_child" => $row["favorite_child"]
-    ]);
+  "parents" => function(array $rows) use ($dbh) {
+    $ids = [];
     
-    return $dbh->lastInsertId();
+    foreach ($rows as $row) {
+      $stmt = $dbh->prepare("INSERT INTO parents (name, favorite_child) VALUES (:name, :favorite_child)");
+      $stmt->execute([
+        ":name" => $row["name"],
+        ":favorite_child" => $row["favorite_child"]
+      ]);
+    
+      $ids[] = $dbh->lastInsertId();        
+    }
+    
+    return $ids;
   },
-  "children" => function(array $row) use ($dbh) {
-    $stmt = $dbh->prepare("INSERT INTO children (parent_id, description) VALUES (:parent_id, :description)");
-    $stmt->execute([
-      ":parent_id" => $row["parent_id"],
-      ":description" => $row["description"]
-    ]);
+  "children" => function(array $rows) use ($dbh) {
+    $ids = [];
     
-    return $dbh->lastInsertId();
+    foreach ($rows as $row) {
+      $stmt = $dbh->prepare("INSERT INTO children (parent_id, description) VALUES (:parent_id, :description)");
+      $stmt->execute([
+        ":parent_id" => $row["parent_id"],
+        ":description" => $row["description"]
+      ]);
+    
+      $ids[] = $dbh->lastInsertId();
+    }
+    
+    return $ids;
   }
 ];
 
 // Create updaters
 $updaters = [
-  "parents" => function($id, array $row) use ($dbh) {
-    $stmt = $dbh->prepare("UPDATE parents SET favorite_child=:favorite_child WHERE id=:id");
-    $stmt->execute([
-      ":id" => $row["id"],
-      ":favorite_child" => $row["favorite_child"]
-    ]);
+  "parents" => function(array $rows) use ($dbh) {
+    foreach ($rows as $row) {
+      $stmt = $dbh->prepare("UPDATE parents SET favorite_child=:favorite_child WHERE id=:id");
+      $stmt->execute([
+        ":id" => $row["id"],
+        ":favorite_child" => $row["favorite_child"]
+      ]);
+    }    
   },
   "children" => null, // Won't be called in this example
 ];
@@ -197,7 +213,7 @@ $deserializer->deserialize($serialization);
 ```php
 <?php
 [
-  "foo" => $recipe->value();
+  "foo" => $recipe->value()
 ]
 ```
 
@@ -208,7 +224,7 @@ Pass through the value of the field.
 ```php
 <?php
 [
-  "foo" => $recipe->raw(123);
+  "foo" => $recipe->raw(123)
 ]
 ```
 
@@ -219,8 +235,8 @@ Force the value of the field.
 ```php
 <?php
 [
-  "foo_id" => $recipe->ref("foos");
-  "bar_id" => $recipe->ref("bars")->optional(0, null);
+  "foo_id" => $recipe->ref("foos"),
+  "bar_id" => $recipe->ref("bars")->optional(0, null)
 ]
 ```
 
@@ -252,8 +268,8 @@ Requires both fields to be present to function properly, supports optional value
   "type" => $recipe->value(),
   "varies" => $recipe->match("type", function(\Prewk\Snapper\Ingredients\Match\MatchMapper $mapper) us ($recipe) {
     return $mapper
-      ->on("FOO", $recipe->ref("foos")),
-      ->pattern("/BAR/", $recipe->ref("bars")),
+      ->on("FOO", $recipe->ref("foos"))
+      ->pattern("/BAR/", $recipe->ref("bars"))
       ->default($recipe->value());
   })
 ]
@@ -282,7 +298,7 @@ use \Prewk\Snapper\Ingredients\Json;
           ->ref("bazes")->optional(null, 0); // Treat null and 0 as value instead of reference
       })
       // Match { "quxes": [<value>, <value>, <value>, <value>] }
-      ->pattern("/quxes\\.\\d+$/", function(\Prewk\Snapper\Ingredients\Json\MatchedJson $matched $matched) {
+      ->pattern("/quxes\\.\\d+$/", function(Json\MatchedJson $matched $matched) {
         return $matched
           ->ref("quxes");
       })
@@ -352,20 +368,6 @@ If two of your tables contain circular references to each other, wrap **one** of
 
 The resulting serialization will start with an `INSERT` op containing the fallback value, and end with an `UPDATE` op with the real reference.
 
-## Validate a snapshot
-
-```php
-<?php
-use Prewk\Snapper;
-
-$validator = new Snapper\Validator(
-  new Snapper\DeserializationBookKeeper,
-  $recipes
-);
-
-$isValid = $validator->validate($serialization);
-```
-
 ## Events
 
 ### Serializer\Events\OnInsert
@@ -389,28 +391,6 @@ $serializer->on(new \Prewk\Snapper\Deserializer\Events\OnUpdate(function(string 
 ```
 
 Will be run just before writing an `UPDATE` op to the serialization array.
-
-### Deserializer\Events\OnInsert
-
-```php
-<?php
-$deserializer->on(new \Prewk\Snapper\Deserializer\Events\OnInsert(function(string $type, array $row) {
-  // Any returned value is ignored
-});
-```
-
-Will be run just before the designated inserter is called.
-
-### Deserializer\Events\OnUpdate
-
-```php
-<?php
-$deserializer->on(new \Prewk\Snapper\Deserializer\Events\OnUpdate(function(string $type, array $row) {
-  // Any returned value is ignored
-});
-```
-
-Will be run just before the designated updater is called.
 
 ## Override recipes/updaters/inserters
 
@@ -478,6 +458,64 @@ $json = file_get_contents("recipe.json");
 // Note: don't decode to associative array
 $validator->validate(json_decode($json));
 ```
+
+## Batched inserts/updates
+
+The insert/update closures will be called with batches of rows that each can be executed in one SQL operation if you want to optimize:
+
+```php
+<?php
+$inserters = [
+  "foos" => function(array $rows) use ($db) {
+    $allValues = [];
+    $vars = [];
+    foreach ($rows as $index => $row) {
+      $values = [];
+
+      foreach ($row as $field => $value) {
+        $vars[":" . $field . "_" . $index] = $value;
+        $values[] = ":" . $field . "_" . $index;
+      }
+
+      $allValues[] = "(" . implode(", ", $values) . ")";
+    }
+    
+    /*
+     * $rows = [
+     *   ["some_field" => "foo", "another_field" => "bar"],
+     *   ["some_field" => "baz", "another_field" => "qux"],
+     *   ["some_field" => "lorem", "another_field" => "ipsum"]
+     * ]
+     * 
+     * -->
+     * 
+     * INSERT INTO foos (some_field, another_field) VALUES
+     *   ("foo", "bar"),
+     *   ("baz", "qux")
+     *   ("lorem", "ipsum")
+     */
+    $insert = "INSERT INTO foos (some_field, another_field) VALUES " . implode(", ", $allValues);
+    $stmt = $db->prepare($insert);
+    $stmt->execute($vars);
+    
+    $lastId = $db->lastInsertId();
+    
+    // If last insert id is 666, then return [664, 665, 666] 
+    return range($lastId - count($rows) + 1, $lastId);
+  },
+];
+```
+
+The following rules apply for the return value from inserters:
+
+* Returning void is acceptable, but the serialization will fail if later rows depend on the skipped primary keys
+* To return the primary keys, return an array of the same length as `$rows`, everything else is invalid
+
+The batch grouping logic considers one of the following conditions as "start a new batch of operations":
+
+* A new row type (table) is encountered
+* The row is dependent on the primary key of another row earlier in the same batch
+* The exact number of, or names of, fields has changed from one row to the next
 
 ## Why?
 

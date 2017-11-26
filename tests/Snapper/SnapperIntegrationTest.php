@@ -160,7 +160,7 @@ class SnapperIntegrationTest extends TestCase
         $this->assertTrue($validator->validate($serialization));
 
         // Break it
-        $serialization[0]["row"]["id"] = "BROKEN";
+        $serialization[0]["rows"][0]["id"] = "BROKEN";
 
         // This serialization shouldn't validate
         $this->assertFalse($validator->validate($serialization));
@@ -214,6 +214,46 @@ class SnapperIntegrationTest extends TestCase
         $this->assertEquals([], $stats["missingFields"]);
     }
 
+    private function insert(PDO $db, $table, array $rows)
+    {
+        $cols = array_keys($rows[0]);
+        $vals = [];
+        $vars = [];
+        foreach ($rows as $index => $row) {
+            $innerVals = [];
+            foreach ($row as $col => $value) {
+                $var = ":{$col}_$index";
+                $vars[$var] = $value;
+                $innerVals[] = $var;
+            }
+            $vals[] = "(" . implode(", ", $innerVals) . ")";
+        }
+
+        $insert = "INSERT INTO $table (" . implode(", ", $cols) . ") VALUES " . implode(", ", $vals);
+
+        $stmt = $db->prepare($insert);
+        $stmt->execute($vars);
+        $lastId = intval($db->lastInsertId());
+
+        return range($lastId - count($rows) + 1, $lastId);
+    }
+
+    private function update(PDO $db, $table, array $rows)
+    {
+        foreach ($rows as $row) {
+            $sets = [];
+            $vars = [":id" => $row["id"]];
+            foreach ($row as $field => $value) {
+                $sets[] = "$field=:$field";
+                $vars[":$field"] = $value;
+            }
+
+            $update = "UPDATE $table SET " . implode(", ", $sets) . " WHERE id = :id";
+            $stmt = $db->prepare($update);
+            $stmt->execute($vars);
+        }
+    }
+
     public function test_full_recipe()
     {
         $recipes = $this->getTestRecipes();
@@ -229,97 +269,32 @@ class SnapperIntegrationTest extends TestCase
         $db = $this->getMemoryDb();
 
         $inserters = [
-            "roots" => function(array $row) use ($db) {
-                $insert = "INSERT INTO roots (name, favorite_node_id) VALUES (:name, :favorite_node_id)";
-                $stmt = $db->prepare($insert);
-                $stmt->execute([
-                    ":name" => $row["name"],
-                    ":favorite_node_id" => $row["favorite_node_id"],
-                ]);
-
-                return intval($db->lastInsertId());
+            "roots" => function(array $rows) use ($db) {
+                return $this->insert($db, "roots", $rows);
             },
-            "nodes" => function(array $row) use ($db) {
-                $insert = "INSERT INTO nodes (root_id, parent) VALUES (:root_id, :parent)";
-                $stmt = $db->prepare($insert);
-                $stmt->execute([
-                    ":root_id" => $row["root_id"],
-                    ":parent" => $row["parent"],
-                ]);
-
-                return intval($db->lastInsertId());
+            "nodes" => function(array $rows) use ($db) {
+                return $this->insert($db, "nodes", $rows);
             },
-            "polys" => function(array $row) use ($db) {
-                $insert = "INSERT INTO polys (polyable_type, polyable_id, json) VALUES (:polyable_type, :polyable_id, :json)";
-                $stmt = $db->prepare($insert);
-                $stmt->execute([
-                    ":polyable_type" => $row["polyable_type"],
-                    ":polyable_id" => $row["polyable_id"],
-                    ":json" => $row["json"],
-                ]);
-
-                return intval($db->lastInsertId());
+            "polys" => function(array $rows) use ($db) {
+                return $this->insert($db, "polys", $rows);
             },
-            "children" => function(array $row) use ($db) {
-                $insert = "INSERT INTO children (type, variable_pointer_id) VALUES (:type, :variable_pointer_id)";
-                $stmt = $db->prepare($insert);
-                $stmt->execute([
-                    ":type" => $row["type"],
-                    ":variable_pointer_id" => $row["variable_pointer_id"],
-                ]);
-
-                return intval($db->lastInsertId());
+            "children" => function(array $rows) use ($db) {
+                return $this->insert($db, "children", $rows);
             },
         ];
 
         $updaters = [
-            "roots" => function($id, array $row) use ($db) {
-                $sets = [];
-                $vars = [":id" => $id];
-                foreach ($row as $field => $value) {
-                    $sets[] = "SET $field=:$field";
-                    $vars[":$field"] = $value;
-                }
-
-                $update = "UPDATE roots " . implode(", ", $sets) . " WHERE id = :id";
-                $stmt = $db->prepare($update);
-                $stmt->execute($vars);
+            "roots" => function(array $rows) use ($db) {
+                $this->update($db, "roots", $rows);
             },
-            "nodes" => function($id, array $row) use ($db) {
-                $sets = [];
-                $vars = [":id" => $id];
-                foreach ($row as $field => $value) {
-                    $sets[] = "SET $field=:$field";
-                    $vars[":$field"] = $value;
-                }
-
-                $update = "UPDATE nodes " . implode(", ", $sets) . " WHERE id = :id";
-                $stmt = $db->prepare($update);
-                $stmt->execute($vars);
+            "nodes" => function(array $rows) use ($db) {
+                $this->update($db, "nodes", $rows);
             },
-            "polys" => function($id, array $row) use ($db) {
-                $sets = [];
-                $vars = [":id" => $id];
-                foreach ($row as $field => $value) {
-                    $sets[] = "SET $field=:$field";
-                    $vars[":$field"] = $value;
-                }
-
-                $update = "UPDATE polys " . implode(", ", $sets) . " WHERE id = :id";
-                $stmt = $db->prepare($update);
-                $stmt->execute($vars);
+            "polys" => function(array $rows) use ($db) {
+                $this->update($db, "polys", $rows);
             },
-            "children" => function($id, array $row) use ($db) {
-                $sets = [];
-                $vars = [":id" => $id];
-                foreach ($row as $field => $value) {
-                    $sets[] = "SET $field=:$field";
-                    $vars[":$field"] = $value;
-                }
-
-                $update = "UPDATE children " . implode(", ", $sets) . " WHERE id = :id";
-                $stmt = $db->prepare($update);
-                $stmt->execute($vars);
+            "children" => function(array $rows) use ($db) {
+                $this->update($db, "children", $rows);
             },
         ];
 

@@ -12,9 +12,6 @@ namespace Prewk\Snapper;
 use Closure;
 use Prewk\Snapper;
 use Prewk\Snapper\Deserializer\DeserializationBookKeeper;
-use Prewk\Snapper\Deserializer\DeserializerEvent;
-use Prewk\Snapper\Deserializer\Events\OnInsert;
-use Prewk\Snapper\Deserializer\Events\OnUpdate;
 use Prewk\Snapper\Exceptions\IntegrityException;
 
 /**
@@ -41,11 +38,6 @@ class Deserializer
      * @var DeserializationBookKeeper
      */
     private $bookKeeper;
-
-    /**
-     * @var DeserializerEvent[]
-     */
-    private $events = [];
 
     /**
      * Deserializer constructor
@@ -105,25 +97,8 @@ class Deserializer
         return $this;
     }
 
-    /**
-     * Execute the given job
-     *
-     * @param array $item
-     * @return Deserializer
-     * @throws IntegrityException
-     */
-    protected function runOp(array $item): self
+    protected function processRow(Recipe $recipe, string $type, array $row): array
     {
-        $op = $item["op"];
-        $type = $item["type"];
-        $row = $item["row"];
-
-        if (!array_key_exists($type, $this->recipes) || !array_key_exists($type, $this->inserters) || !array_key_exists($type, $this->updaters)) {
-            throw new RecipeException("Unknown type: $type");
-        }
-
-        $recipe = $this->recipes[$type];
-
         $uuid = $row[$recipe->getPrimaryKey()];
         $resolvedRow = [];
 
@@ -141,13 +116,33 @@ class Deserializer
             }
         }
 
-        // Fire events
-        foreach ($this->events as $event) {
-            if ($op === Snapper::INSERT && $event instanceof OnInsert) {
-                $event->call($type, $resolvedRow);
-            } else if ($op === Snapper::UPDATE && $event instanceof OnUpdate) {
-                $event->call($type, $resolvedRow);
-            }
+        return [
+            "uuid" => $uuid,
+            "resolvedRow" => $resolvedRow,
+        ];
+    }
+
+    /**
+     * Execute the given job
+     *
+     * @param array $item
+     * @return Deserializer
+     * @throws IntegrityException
+     */
+    protected function runOp(array $item): self
+    {
+        $op = $item["op"];
+        $type = $item["type"];
+
+        if (!array_key_exists($type, $this->recipes) || !array_key_exists($type, $this->inserters) || !array_key_exists($type, $this->updaters)) {
+            throw new RecipeException("Unknown type: $type");
+        }
+
+        $recipe = $this->recipes[$type];
+
+        $results = [];
+        foreach ($item["rows"] as $row) {
+            $results[] = $this->processRow($recipe, $type, $row);
         }
 
         if ($op === Snapper::INSERT) {
@@ -155,36 +150,38 @@ class Deserializer
             unset($row[$recipe->getPrimaryKey()]);
 
             // Create the row using the inserter
-            $id = $this->inserters[$type]($resolvedRow);
-
-            if (!isset($id)) {
-                throw new IntegrityException("Inserters must return the primary key created");
+            $resolvedRows = [];
+            foreach ($results as $item) {
+                $resolvedRows[] = $item["resolvedRow"];
             }
+            $ids = $this->inserters[$type]($resolvedRows);
 
-            // Next time this internal serialization uuid is requested - answer with the database id
-            $this->bookKeeper->wire($uuid, $id);
+            if (isset($ids)) {
+                if (!is_array($ids)) {
+                    throw new IntegrityException("Inserters must return nothing or an array of primary keys created");
+                }
+
+                if (count($ids) !== count($results)) {
+                    throw new IntegrityException("Returned inserter primary key array had the wrong length");
+                }
+
+                foreach ($ids as $index => $id) {
+                    // Next time this internal serialization uuid is requested - answer with the database id
+                    $this->bookKeeper->wire($results[$index]["uuid"], $id);
+                }
+            }
         } else if ($op === Snapper::UPDATE) {
             // Update the row using the updater
-            $this->updaters[$type]($this->bookKeeper->resolveId($type, $uuid), $resolvedRow);
+            $resolvedRows = [];
+            foreach ($results as $item) {
+                $resolvedRow = $item["resolvedRow"];
+                $resolvedRow[$recipe->getPrimaryKey()] = $this->bookKeeper->resolveId($type, $item["uuid"]);
+                $resolvedRows[] = $resolvedRow;
+            }
+            $this->updaters[$type]($resolvedRows);
         }
 
         return $this;
-    }
-
-    /**
-     * Register an event
-     *
-     * @param DeserializerEvent $event
-     * @return Closure Unregistering function
-     */
-    public function on(DeserializerEvent $event): Closure
-    {
-        $index = count($this->events);
-        $this->events[] = $event;
-
-        return function() use ($index) {
-            unset($this->events[$index]);
-        };
     }
 
     /**
