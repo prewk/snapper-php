@@ -19,9 +19,13 @@
     }
   },
   "config": {
-    "bin-dir": "bin"
+    "bin-dir": "bin",
+    "platform": {
+      "php": "7.0"
+    }
   },
   "require": {
+    "php": ">=7",
     "illuminate/support": "5.*",
     "marcj/topsort": "^1.1",
     "ramsey/uuid": "^3.7",
