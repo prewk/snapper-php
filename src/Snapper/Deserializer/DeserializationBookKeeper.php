@@ -27,10 +27,11 @@ class DeserializationBookKeeper implements BookKeeper
      *
      * @param $type
      * @param $id
+     * @param bool $authoritative
      * @return mixed
      * @throws IntegrityException
      */
-    public function resolveId($type, $id)
+    public function resolveId($type, $id, bool $authoritative = false)
     {
         if (!isset($this->ids[$id])) {
             throw new IntegrityException("An id ($id) needed to be resolved but wasn't known");

@@ -97,7 +97,14 @@ class Deserializer
         return $this;
     }
 
-    protected function processRow(Recipe $recipe, string $type, array $row): array
+    /**
+     * Process a row
+     *
+     * @param Recipe $recipe
+     * @param array $row
+     * @return array
+     */
+    protected function processRow(Recipe $recipe, array $row): array
     {
         $uuid = $row[$recipe->getPrimaryKey()];
         $resolvedRow = [];
@@ -142,17 +149,19 @@ class Deserializer
 
         $results = [];
         foreach ($item["rows"] as $row) {
-            $results[] = $this->processRow($recipe, $type, $row);
+            $results[] = $this->processRow($recipe, $row);
         }
 
         if ($op === Snapper::INSERT) {
-            // Remove the primary key from the INSERT row before sending to the inserter
-            unset($row[$recipe->getPrimaryKey()]);
-
             // Create the row using the inserter
             $resolvedRows = [];
             foreach ($results as $item) {
-                $resolvedRows[] = $item["resolvedRow"];
+                $resolvedRow = $item["resolvedRow"];
+
+                // Add the uuid key, it might be useful to the user when inserting
+                $resolvedRow[$recipe->getPrimaryKey()] = $item["uuid"];
+
+                $resolvedRows[] = $resolvedRow;
             }
             $ids = $this->inserters[$type]($resolvedRows);
 

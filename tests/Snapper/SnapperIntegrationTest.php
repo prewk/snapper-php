@@ -153,7 +153,7 @@ class SnapperIntegrationTest extends TestCase
             $serializer->add($type, $row);
         }
 
-        $serialization = $serializer->compile();
+        $serialization = $serializer->compile()->getOps();
         $validator = new Validator(new DeserializationBookKeeper, $recipes);
 
         // This serialization should validate
@@ -216,12 +216,18 @@ class SnapperIntegrationTest extends TestCase
 
     private function insert(PDO $db, $table, array $rows)
     {
-        $cols = array_keys($rows[0]);
+        $cols = [];
         $vals = [];
         $vars = [];
         foreach ($rows as $index => $row) {
             $innerVals = [];
             foreach ($row as $col => $value) {
+                if ($col === "id") continue;
+
+                if (!in_array($col, $cols)) {
+                    $cols[] = $col;
+                }
+
                 $var = ":{$col}_$index";
                 $vars[$var] = $value;
                 $innerVals[] = $var;
@@ -299,7 +305,7 @@ class SnapperIntegrationTest extends TestCase
         ];
 
         $deserializer = new Deserializer(new DeserializationBookKeeper, $recipes, $inserters, $updaters);
-        $deserializer->deserialize($serialization);
+        $deserializer->deserialize($serialization->getOps());
 
         $getRowsOfType = function($type) use ($testRows) {
             return array_map(function($tuple) {

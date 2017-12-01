@@ -16,6 +16,7 @@ use Prewk\Snapper\Exceptions\RecipeException;
 use Prewk\Snapper\Ingredients\Circular;
 use Prewk\Snapper\Serializer\Events\OnInsert;
 use Prewk\Snapper\Serializer\Events\OnUpdate;
+use Prewk\Snapper\Serializer\Serialization;
 use Prewk\Snapper\Serializer\SerializationBookKeeper;
 use Prewk\Snapper\Serializer\SerializerEvent;
 
@@ -75,6 +76,21 @@ class Serializer
     }
 
     /**
+     * Reset the serializer for re-use (only recipes are kept)
+     *
+     * @return Serializer
+     */
+    public function reset(): self
+    {
+        $this->sorter = $this->sorter->make();
+        $this->circularSorter = $this->sorter->make();
+        $this->bookKeeper->reset();
+        $this->rows = [];
+
+        return $this;
+    }
+
+    /**
      * Set/Override a recipe
      *
      * @param string $type
@@ -105,7 +121,7 @@ class Serializer
         $recipe = $this->recipes[$type];
 
         $id = $row[$recipe->getPrimaryKey()];
-        $uuid = $this->bookKeeper->resolveId($type, $id);
+        $uuid = $this->bookKeeper->resolveId($type, $id, true);
         $deps = [];
         $circularDeps = [];
         $resolvedRow = [
@@ -330,10 +346,9 @@ class Serializer
     /**
      * Turn the added rows into a sequence of operations
      *
-     * @return array
-     * @throws IntegrityException
+     * @return Serialization
      */
-    public function compile(): array
+    public function compile(): Serialization
     {
         $order = $this->sorter->sortWithBookkeeping($this->bookKeeper)->unwrap();
 
@@ -351,6 +366,8 @@ class Serializer
                 })
         );
 
-        return array_merge($this->toInsertOps($order), $this->toUpdateOps($circularOrder));
+        $ops = array_merge($this->toInsertOps($order), $this->toUpdateOps($circularOrder));
+
+        return new Serialization($ops, $this->bookKeeper);
     }
 }

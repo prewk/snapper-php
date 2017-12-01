@@ -133,7 +133,7 @@ $serializer->add("children", [
 ]);
 
 // Serialize into a snapshot
-$serialization = $serializer->compile();
+$serialization = $serializer->compile()->getOps();
 ```
 
 ### How to deserialize?
@@ -516,6 +516,13 @@ The batch grouping logic considers one of the following conditions as "start a n
 * A new row type (table) is encountered
 * The row is dependent on the primary key of another row earlier in the same batch
 * The exact number of, or names of, fields has changed from one row to the next
+
+## Id manifest
+
+The result of a compilation (`$serializer->compile()`) is a `Serialization`. It has two methods:
+
+* `getOps()` - Get an array representing the sequence of operations (the actual "serialization" if you will)
+* `getIdManifest()` - Get a dictionary mapping the internal uuids in the serialization to your given db ids, grouped by type (table name)
 
 ## Why?
 

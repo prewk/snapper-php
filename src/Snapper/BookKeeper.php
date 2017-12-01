@@ -19,9 +19,10 @@ interface BookKeeper
      *
      * @param $type
      * @param $id
+     * @param bool $authoritative
      * @return mixed
      */
-    public function resolveId($type, $id);
+    public function resolveId($type, $id, bool $authoritative = false);
 
     /**
      * Reset the BookKeeper's internal state

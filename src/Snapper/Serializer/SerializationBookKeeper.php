@@ -29,6 +29,45 @@ class SerializationBookKeeper implements BookKeeper
     private $pairById = [];
 
     /**
+     * @var array
+     */
+    private $casts = [];
+
+    /**
+     * Cast id to its original
+     *
+     * @param string $uuid
+     * @param string $id
+     * @return int|string
+     */
+    protected function cast(string $uuid, string $id)
+    {
+        return isset($this->casts[$uuid]) && $this->casts[$uuid] === "int"
+            ? intval($id)
+            : $id;
+    }
+
+    /**
+     * Turn the Map<Type/Id, Uuid> into a Map<Type, Map<Uuid, Id>>
+     *
+     * @return array
+     */
+    public function getIdDict(): array
+    {
+        $deep = [];
+
+        foreach ($this->idByPair as $pairStr => $uuid) {
+            list($type, $id) = explode("/", $pairStr);
+
+            if (!isset($deep[$type])) $deep[$type] = [];
+
+            $deep[$type][$uuid] = $this->cast($uuid, $id);
+        }
+
+        return $deep;
+    }
+
+    /**
      * @param string $type
      * @param $id
      * @return string
@@ -47,8 +86,10 @@ class SerializationBookKeeper implements BookKeeper
     public function getPairByUuid(string $uuid): Option
     {
         return Option\From::key($this->pairById, $uuid)
-            ->map(function(string $pairStr) {
-                return explode("/", $pairStr);
+            ->map(function(string $pairStr) use ($uuid) {
+                list($type, $id) = explode("/", $pairStr);
+
+                return [$type, cast($uuid, $id)];
             });
     }
 
@@ -57,20 +98,28 @@ class SerializationBookKeeper implements BookKeeper
      *
      * @param string $type
      * @param $id
+     * @param bool $authoritative
      * @return mixed
      */
-    public function resolveId($type, $id)
+    public function resolveId($type, $id, bool $authoritative = false)
     {
         $pair = $this->pair($type, $id);
 
         if (isset($this->idByPair[$pair])) {
-            return $this->idByPair[$pair];
+            $uuid = $this->idByPair[$pair];
+
+            if ($authoritative) {
+                $this->casts[$uuid] = is_int($id) ? "int" : "string";
+            }
+
+            return $uuid;
         }
 
         $uuid = Uuid::uuid4()->toString();
 
         $this->idByPair[$pair] = $uuid;
         $this->pairById[$uuid] = $pair;
+        $this->casts[$uuid] = is_int($id) ? "int" : "string";
 
         return $uuid;
     }
