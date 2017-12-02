@@ -227,6 +227,18 @@ class Deserializer
                 $resolvedRows[] = $resolvedRow;
             }
             $this->updaters[$type]($resolvedRows);
+
+            // Process onDeps events
+            if (!empty($this->onDepsEvents)) {
+                foreach ($results as $index => $item) {
+                    foreach ($item["deps"] as list($depType, $depId)) {
+                        if (isset($this->onDepsEvents[$depType])) {
+                            // Call onDepsEvent as (dependee type, dependee, dependency)
+                            $this->onDepsEvents[$depType]($type, $resolvedRows[$recipe->getPrimaryKey()], $this->bookKeeper->resolveId($depType, $depId));
+                        }
+                    }
+                }
+            }
         }
 
         return $this;
