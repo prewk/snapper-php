@@ -207,7 +207,7 @@ class Deserializer
                         foreach ($item["deps"] as list($depType, $depId)) {
                             if (isset($this->onDepsEvents[$depType])) {
                                 // Call onDepsEvent as (dependee type, dependee, dependency)
-                                $this->onDepsEvents[$depType]($type, $ids[$index], $depId);
+                                $this->onDepsEvents[$depType]($type, $ids[$index], $this->bookKeeper->resolveId($depType, $depId));
                             }
                         }
                     }
