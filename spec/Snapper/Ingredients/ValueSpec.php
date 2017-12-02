@@ -28,7 +28,7 @@ class ValueSpec extends ObjectBehavior
 
     function it_deserializes_into_some_value(BookKeeper $books)
     {
-        $this->deserialize("foo", ["bar" => "foo"], $books)->unwrap()->shouldBe("foo");
+        $this->deserialize("foo", ["bar" => "foo"], $books)->unwrap()["value"]->shouldBe("foo");
     }
 
     function it_doesnt_have_extra_fields()

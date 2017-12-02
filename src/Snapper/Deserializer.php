@@ -13,6 +13,7 @@ use Closure;
 use Prewk\Snapper;
 use Prewk\Snapper\Deserializer\DeserializationBookKeeper;
 use Prewk\Snapper\Exceptions\IntegrityException;
+use Prewk\Snapper\Exceptions\RecipeException;
 
 /**
  * Deserializer
@@ -40,6 +41,11 @@ class Deserializer
     private $bookKeeper;
 
     /**
+     * @var arary
+     */
+    private $onDepsEvents = [];
+
+    /**
      * Deserializer constructor
      *
      * @param DeserializationBookKeeper $bookKeeper
@@ -53,6 +59,22 @@ class Deserializer
         $this->inserters = $inserters;
         $this->updaters = $updaters;
         $this->bookKeeper = $bookKeeper;
+    }
+
+    /**
+     * Every time an item's non-circular dependencies are resolved, call the callback
+     *
+     * @param string $type
+     * @param Closure $callback
+     * @return Closure
+     */
+    public function onDeps(string $type, Closure $callback): Closure
+    {
+        $this->onDepsEvents[$type] = $callback;
+
+        return function() use ($type) {
+            unset($this->onDepsEvents[$type]);
+        };
     }
 
     /**
@@ -108,6 +130,7 @@ class Deserializer
     {
         $uuid = $row[$recipe->getPrimaryKey()];
         $resolvedRow = [];
+        $deps = [];
 
         // Go through the ingredients
         foreach ($recipe->getIngredients() as $field => $ingredient) {
@@ -116,16 +139,19 @@ class Deserializer
             }
 
             // Get the deserialized field value using the ingredient and previously accumulated ids
-            $val = $ingredient->deserialize($row[$field], $row, $this->bookKeeper);
-
-            if ($val->isSome()) {
-                $resolvedRow[$field] = $val->unwrap();
-            }
+            $ingredient->deserialize($row[$field], $row, $this->bookKeeper)
+                ->map(function(array $struct) use (&$deps, &$resolvedRow, $field) {
+                    $resolvedRow[$field] = $struct["value"];
+                    if (!empty($struct["deps"])) {
+                        $deps = array_merge($deps, $struct["deps"]);
+                    }
+                });
         }
 
         return [
             "uuid" => $uuid,
             "resolvedRow" => $resolvedRow,
+            "deps" => $deps,
         ];
     }
 
@@ -163,6 +189,7 @@ class Deserializer
 
                 $resolvedRows[] = $resolvedRow;
             }
+
             $ids = $this->inserters[$type]($resolvedRows);
 
             if (isset($ids)) {
@@ -172,6 +199,18 @@ class Deserializer
 
                 if (count($ids) !== count($results)) {
                     throw new IntegrityException("Returned inserter primary key array had the wrong length");
+                }
+
+                // Process onDeps events
+                if (!empty($this->onDepsEvents)) {
+                    foreach ($results as $index => $item) {
+                        foreach ($item["deps"] as list($depType, $depId)) {
+                            if (isset($this->onDepsEvents[$depType])) {
+                                // Call onDepsEvent as (dependee type, dependee, dependency)
+                                $this->onDepsEvents[$depType]($type, $ids[$index], $depId);
+                            }
+                        }
+                    }
                 }
 
                 foreach ($ids as $index => $id) {

@@ -305,6 +305,12 @@ class SnapperIntegrationTest extends TestCase
         ];
 
         $deserializer = new Deserializer(new DeserializationBookKeeper, $recipes, $inserters, $updaters);
+
+        $rootDeps = [];
+        $deserializer->onDeps("roots", function($type, $dependee, $dependency) use (&$rootDeps) {
+            $rootDeps["$type/$dependee"] = $dependency;
+        });
+
         $deserializer->deserialize($serialization->getOps());
 
         $getRowsOfType = function($type) use ($testRows) {
@@ -319,5 +325,12 @@ class SnapperIntegrationTest extends TestCase
         $this->assertEquals($getRowsOfType("nodes"), $this->getAll($db, "nodes"));
         $this->assertEquals($getRowsOfType("polys"), $this->getAll($db, "polys"));
         $this->assertEquals($getRowsOfType("children"), $this->getAll($db, "children"));
+
+        $this->assertEquals([
+            "nodes/1" => 1,
+            "nodes/2" => 1,
+            "nodes/3" => 1,
+            "children/1" => 1,
+        ], $rootDeps);
     }
 }

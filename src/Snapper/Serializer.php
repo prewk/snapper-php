@@ -14,11 +14,8 @@ use Prewk\Snapper;
 use Prewk\Snapper\Exceptions\IntegrityException;
 use Prewk\Snapper\Exceptions\RecipeException;
 use Prewk\Snapper\Ingredients\Circular;
-use Prewk\Snapper\Serializer\Events\OnInsert;
-use Prewk\Snapper\Serializer\Events\OnUpdate;
 use Prewk\Snapper\Serializer\Serialization;
 use Prewk\Snapper\Serializer\SerializationBookKeeper;
-use Prewk\Snapper\Serializer\SerializerEvent;
 
 /**
  * Serializer
@@ -54,11 +51,6 @@ class Serializer
      * @var array
      */
     private $circularRows = [];
-
-    /**
-     * @var SerializerEvent[]
-     */
-    private $events = [];
 
     /**
      * Serializer constructor
@@ -175,31 +167,11 @@ class Serializer
                 }
             }
 
-            // Call OnUpdate events
-            foreach ($this->events as $event) {
-                if ($event instanceof OnUpdate) {
-                    $overwrite = $event->call($type, $resolvedCircularRow);
-                    if (is_array($overwrite)) {
-                        $resolvedCircularRow = $overwrite;
-                    }
-                }
-            }
-
             $this->circularRows[$uuid] = [
                 "deps" => $circularDeps,
                 "row" => $resolvedCircularRow,
                 "type" => $type,
             ];
-        }
-
-        // Call OnInsert events
-        foreach ($this->events as $event) {
-            if ($event instanceof OnInsert) {
-                $overwrite = $event->call($type, $resolvedRow);
-                if (is_array($overwrite)) {
-                    $resolvedRow = $overwrite;
-                }
-            }
         }
 
         $this->rows[$uuid] = [
@@ -213,22 +185,6 @@ class Serializer
         $this->circularSorter->add($uuid);
 
         return $this;
-    }
-
-    /**
-     * Register an event
-     *
-     * @param SerializerEvent $event
-     * @return Closure
-     */
-    public function on(SerializerEvent $event): Closure
-    {
-        $index = count($this->events);
-        $this->events[] = $event;
-
-        return function() use ($index) {
-            unset($this->events[$index]);
-        };
     }
 
     /**

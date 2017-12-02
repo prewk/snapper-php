@@ -50,13 +50,13 @@ class RefSpec extends ObjectBehavior
         $books->resolveId("foos", "foo")->willReturn("MOCK_ID");
 
         $this->beConstructedWith("foos");
-        $this->deserialize("foo", ["bar" => "foo"], $books)->unwrap()->shouldBe("MOCK_ID");
+        $this->deserialize("foo", ["bar" => "foo"], $books)->unwrap()["value"]->shouldBe("MOCK_ID");
     }
 
     function it_deserializes_an_optional_value_into_some_optional_value(BookKeeper $books)
     {
         $this->beConstructedWith("foos");
-        $this->optional("OPTIONAL")->deserialize("OPTIONAL", ["bar" => "OPTIONAL"], $books, false)->unwrap()->shouldBe("OPTIONAL");
-        $this->optional("OPTIONAL", "OTHER_OPTIONAL")->deserialize("OTHER_OPTIONAL", ["bar" => "OTHER_OPTIONAL"], $books, true)->unwrap()->shouldBe("OTHER_OPTIONAL");
+        $this->optional("OPTIONAL")->deserialize("OPTIONAL", ["bar" => "OPTIONAL"], $books, false)->unwrap()["value"]->shouldBe("OPTIONAL");
+        $this->optional("OPTIONAL", "OTHER_OPTIONAL")->deserialize("OTHER_OPTIONAL", ["bar" => "OTHER_OPTIONAL"], $books, true)->unwrap()["value"]->shouldBe("OTHER_OPTIONAL");
     }
 }

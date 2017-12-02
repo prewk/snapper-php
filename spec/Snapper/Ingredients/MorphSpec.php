@@ -61,8 +61,8 @@ class MorphSpec extends ObjectBehavior
                 ->map("FOO", "foos")
                 ->map("BAR", "bars");
         });
-        $this->deserialize(123, ["polyable_type" => "BAR", "polyable_id" => 123], $books, false)->unwrap()->shouldBe("MOCK_ID");
-        $this->deserialize(123, ["polyable_type" => "BAR", "polyable_id" => 123], $books, true)->unwrap()->shouldBe("MOCK_ID");
+        $this->deserialize(123, ["polyable_type" => "BAR", "polyable_id" => 123], $books, false)->unwrap()["value"]->shouldBe("MOCK_ID");
+        $this->deserialize(123, ["polyable_type" => "BAR", "polyable_id" => 123], $books, true)->unwrap()["value"]->shouldBe("MOCK_ID");
     }
 
     function it_requires_an_extra_field()

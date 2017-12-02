@@ -142,7 +142,15 @@ class Morph implements Ingredient
      */
     public function deserialize($value, array $row, BookKeeper $books): Option
     {
-        return $this->serialize($value, $row, $books, false);
+        return $this->getMorphMapper($value, $row)
+            ->andThen(function(MorphMapper $morphMapper) use ($value, $row, $books) {
+                $morphType = $row[$this->field];
+
+                return $morphMapper->resolve($morphType, $value, $books)
+                    ->map(function($id) use ($morphType) {
+                        return ["value" => $id, "deps" => [[$morphType, $id]]];
+                    });
+            });
     }
 
     /**

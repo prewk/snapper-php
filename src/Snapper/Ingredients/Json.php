@@ -104,9 +104,11 @@ class Json implements Ingredient
      */
     public function deserialize($value, array $row, BookKeeper $books): Option
     {
-        if (!is_string($value)) return new Some($value);
+        if (!is_string($value)) return new Some(["deps" => [], "value" => $value]);
 
-        foreach ($this->getDeps($value, $row, false) as list($type, $id)) {
+        $deps = $this->getDeps($value, $row, false);
+
+        foreach ($deps as list($type, $id)) {
             $replacement = $books->resolveId($type, $id);
             if (is_numeric($replacement)) {
                 $value = str_replace("\"$id\"", $replacement, $value);
@@ -114,7 +116,7 @@ class Json implements Ingredient
             $value = str_replace($id, $replacement, $value);
         }
 
-        return new Some($value);
+        return new Some(["deps" => $deps, "value" => $value]);
     }
 
     /**

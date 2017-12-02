@@ -163,7 +163,9 @@ class JsonSpec extends ObjectBehavior
         $books->resolveId("quxes", "PARSED_4")->willReturn(4);
         $books->resolveId("quxes", "PARSED_5")->willReturn(5);
 
-        $this->deserialize($value, ["value" => $value], $books)->unwrap()->shouldBe(json_encode([
+        $struct = $this->deserialize($value, ["value" => $value], $books)->unwrap();
+
+        $struct["value"]->shouldBe(json_encode([
             "foo" => ["foo_id" => 1],
             "bar" => ["bar_id" => null],
             "baz" => ["baz_id" => "Lorem id:<2> ipsum id:<3>"],

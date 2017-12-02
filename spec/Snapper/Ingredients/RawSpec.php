@@ -32,8 +32,8 @@ class RawSpec extends ObjectBehavior
     function it_should_deserialize_into_some_value(BookKeeper $books)
     {
         $this->beConstructedWith("qux");
-        $this->deserialize("foo", ["bar" => "foo"], $books, false)->unwrap()->shouldBe("qux");
-        $this->deserialize("foo", ["bar" => "foo"], $books, true)->unwrap()->shouldBe("qux");
+        $this->deserialize("foo", ["bar" => "foo"], $books, false)->unwrap()["value"]->shouldBe("qux");
+        $this->deserialize("foo", ["bar" => "foo"], $books, true)->unwrap()["value"]->shouldBe("qux");
     }
 
     function it_should_have_no_extra_fields()

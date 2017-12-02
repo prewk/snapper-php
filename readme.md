@@ -370,27 +370,14 @@ The resulting serialization will start with an `INSERT` op containing the fallba
 
 ## Events
 
-### Serializer\Events\OnInsert
+### onDeps
 
 ```php
 <?php
-$serializer->on(new \Prewk\Snapper\Deserializer\Events\OnInsert(function(string $type, array $row) {
-  // If an array is returned here, it will be used instead of $row
+$deserializer->onDeps("foos", function(string $dependeeType, $dependeeId, $dependencyId) {
+  // Every time a dependency of type "foos" has been deserialized, this closure will be called
 });
 ```
-
-Will be run just before writing an `INSERT` op to the serialization array.
-
-### Serializer\Events\OnUpdate
-
-```php
-<?php
-$serializer->on(new \Prewk\Snapper\Deserializer\Events\OnUpdate(function(string $type, array $row) {
-  // If an array is returned here, it will be used instead of $row
-});
-```
-
-Will be run just before writing an `UPDATE` op to the serialization array.
 
 ## Override recipes/updaters/inserters
 

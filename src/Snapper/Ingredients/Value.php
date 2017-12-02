@@ -56,7 +56,7 @@ class Value implements Ingredient
      */
     public function deserialize($value, array $row, BookKeeper $books): Option
     {
-        return $this->serialize($value, $row, $books);
+        return new Some(["deps" => [], "value" => $value]);
     }
 
     /**

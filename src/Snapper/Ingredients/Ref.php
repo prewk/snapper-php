@@ -95,7 +95,13 @@ class Ref implements Ingredient
      */
     public function deserialize($value, array $row, BookKeeper $books): Option
     {
-        return $this->serialize($value, $row, $books);
+        foreach ($this->optionalValues as $opt) {
+            if ($opt === $value) return new Some(["deps" => [], "value" => $value]);
+        }
+
+        $ref = $books->resolveId($this->type, $value);
+
+        return new Some(["deps" => [[$this->type, $ref]], "value" => $ref]);
     }
 
     /**
