@@ -89,7 +89,7 @@ class SerializationBookKeeper implements BookKeeper
             ->map(function(string $pairStr) use ($uuid) {
                 list($type, $id) = explode("/", $pairStr);
 
-                return [$type, cast($uuid, $id)];
+                return [$type, $this->cast($uuid, $id)];
             });
     }
 
