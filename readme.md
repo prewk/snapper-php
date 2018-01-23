@@ -90,7 +90,7 @@ $r = new Snapper\Recipe;
 $recipe = [
   "parents" => $r
     ->primary("id") // Primary key at field "id"
-    ->recipe([
+    ->ingredients([
       "name" => $r->value(), // Field "name" is just a value
       // Field "favorite_child" has a circular dependency to the "children" table
       "favorite_child" => $r->circular(
@@ -102,7 +102,7 @@ $recipe = [
     ]),
   "children" => $r
     ->primary("id") // Primary key at field "id"
-    ->recipe([
+    ->ingredients([
       "parent_id" => $r->ref("parents"), // Field "parent_id" is referencing the "parents" table
       "description" => $r->value() // Field "description" is just a value
     ])
