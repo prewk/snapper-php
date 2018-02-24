@@ -171,7 +171,8 @@ class Morph implements Ingredient
      */
     public static function fromArray(array $config): Ingredient
     {
-        return new static($config["field"], MorphMapper::fromArray($config["morph_mapper"]));
+        return (new static($config["field"], MorphMapper::fromArray($config["morph_mapper"])))
+            ->optional(...$config["optional_values"]);
     }
 
     /**
@@ -191,6 +192,7 @@ class Morph implements Ingredient
             "config" => [
                 "field" => $this->field,
                 "morph_mapper" => $morphMapper->jsonSerialize(),
+                "optional_values" => $this->optionalValues,
             ],
         ];
     }

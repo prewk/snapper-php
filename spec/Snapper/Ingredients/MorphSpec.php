@@ -16,6 +16,17 @@ class MorphSpec extends ObjectBehavior
         $this->shouldHaveType(Morph::class);
     }
 
+    function it_can_be_optional()
+    {
+        $this->beConstructedWith("polyable_type", function(MorphMapper $mapper) {
+            return $mapper
+                ->map("FOO", "foos")
+                ->map("BAR", "bars");
+        });
+        $this->optional("OPTIONAL")->getDeps("OPTIONAL", ["polyable_type" => "BAR", "polyable_id" => "OPTIONAL"], false)->shouldBe([]);
+        $this->optional("OPTIONAL")->getDeps(123, ["polyable_type" => "OPTIONAL", "polyable_id" => 123], false)->shouldBe([]);
+    }
+
     function it_can_have_a_polymorphic_dependency()
     {
         $this->beConstructedWith("polyable_type", function(MorphMapper $mapper) {
