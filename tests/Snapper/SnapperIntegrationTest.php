@@ -331,6 +331,7 @@ class SnapperIntegrationTest extends TestCase
             "nodes/2" => 1,
             "nodes/3" => 1,
             "children/1" => 1,
+            "polys/1" => 1,
         ], $rootDeps);
     }
 }

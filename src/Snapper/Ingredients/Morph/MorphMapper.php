@@ -56,6 +56,19 @@ class MorphMapper implements JsonSerializable
     }
 
     /**
+     * Resolve a morph type into a dependency type
+     *
+     * @param string $morphType
+     * @return Option Option<string>
+     */
+    public function resolveType(string $morphType): Option
+    {
+        return array_key_exists($morphType, $this->morphMap)
+            ? new Some($this->morphMap[$morphType])
+            : new None();
+    }
+
+    /**
      * Help Morph resolve its value
      *
      * @param string $morphType

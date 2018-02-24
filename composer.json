@@ -29,9 +29,9 @@
     "illuminate/support": "5.*",
     "marcj/topsort": "^1.1",
     "ramsey/uuid": "^3.7",
-    "prewk/option": "^1.1",
+    "prewk/option": "1.*",
     "prewk/snapper-schema": "2.1.2",
-    "prewk/result": "^1.0"
+    "prewk/result": "1.*"
   },
   "require-dev": {
     "symfony/var-dumper": "^3.3",

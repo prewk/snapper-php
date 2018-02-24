@@ -62,7 +62,7 @@ class Morph implements Ingredient
     }
 
     /**
-     * Get the MorphMapper for the ingredient
+     * Get the MorphMapper for the Ingredient
      *
      * @param $value
      * @param array $row
@@ -143,13 +143,14 @@ class Morph implements Ingredient
     public function deserialize($value, array $row, BookKeeper $books): Option
     {
         return $this->getMorphMapper($value, $row)
-            ->andThen(function(MorphMapper $morphMapper) use ($value, $row, $books) {
-                $morphType = $row[$this->field];
-
-                return $morphMapper->resolve($morphType, $value, $books)
-                    ->map(function($id) use ($morphType) {
-                        return ["value" => $id, "deps" => [[$morphType, $id]]];
-                    });
+            ->andThen(function(MorphMapper $morphMapper) use ($row) {
+                return $morphMapper->resolveType($row[$this->field])->with($morphMapper);
+            })
+            ->andThen(function(string $refType, MorphMapper $morphMapper) use ($value, $row, $books) {
+                return $morphMapper->resolve($row[$this->field], $value, $books)->with($refType);
+            })
+            ->map(function($id, string $refType) use ($value) {
+                return ["value" => $id, "deps" => [[$refType, $value]]];
             });
     }
 

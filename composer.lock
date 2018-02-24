@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "fbbc62c268e0c6963599d1d362c9a14e",
+    "content-hash": "00814fe638e6059ded400ca1bc12bd40",
     "packages": [
         {
             "name": "doctrine/inflector",
@@ -324,16 +324,16 @@
         },
         {
             "name": "prewk/option",
-            "version": "1.1.2",
+            "version": "1.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/prewk/option.git",
-                "reference": "f6ac3ae23153d4d410a0109bb95784746c580f4b"
+                "reference": "e1ca5371c837a459b18d23157c11f79bc7e21ca7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/prewk/option/zipball/f6ac3ae23153d4d410a0109bb95784746c580f4b",
-                "reference": "f6ac3ae23153d4d410a0109bb95784746c580f4b",
+                "url": "https://api.github.com/repos/prewk/option/zipball/e1ca5371c837a459b18d23157c11f79bc7e21ca7",
+                "reference": "e1ca5371c837a459b18d23157c11f79bc7e21ca7",
                 "shasum": ""
             },
             "require": {
@@ -362,20 +362,20 @@
                 }
             ],
             "description": "Option object for PHP inspired by Rust",
-            "time": "2017-11-20T15:31:21+00:00"
+            "time": "2018-02-24T15:54:29+00:00"
         },
         {
             "name": "prewk/result",
-            "version": "1.1.0",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/prewk/result.git",
-                "reference": "eb994511d9be441c6c0437be20c64d554dcf44f5"
+                "reference": "2f19406679300dbb47e6272f1236e5b5d6ead6fb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/prewk/result/zipball/eb994511d9be441c6c0437be20c64d554dcf44f5",
-                "reference": "eb994511d9be441c6c0437be20c64d554dcf44f5",
+                "url": "https://api.github.com/repos/prewk/result/zipball/2f19406679300dbb47e6272f1236e5b5d6ead6fb",
+                "reference": "2f19406679300dbb47e6272f1236e5b5d6ead6fb",
                 "shasum": ""
             },
             "require": {
@@ -404,7 +404,7 @@
                 }
             ],
             "description": "Result object for PHP inspired by Rust",
-            "time": "2017-11-23T15:56:01+00:00"
+            "time": "2018-02-03T09:38:04+00:00"
         },
         {
             "name": "prewk/snapper-schema",
