@@ -125,7 +125,7 @@ class PatternReplacer implements JsonSerializable
     {
         $replacer = new static($config["placeholder"]);
 
-        foreach ($this->replacements as list($type, $matchIndex, $replace)) {
+        foreach ($config["replacements"] as list($type, $matchIndex, $replace)) {
             $replacer->replace($type, $matchIndex, $replace);
         }
 
