@@ -144,7 +144,7 @@ use Prewk\Snapper;
 
 // $recipe = <Same as above>
 // $serialization = <The snapshot>
-// $dbh = <PDO handler>
+// $dbh = <PDO handle>
 
 // Create inserters
 $inserters = [
@@ -298,7 +298,7 @@ use \Prewk\Snapper\Ingredients\Json;
           ->ref("bazes")->optional(null, 0); // Treat null and 0 as value instead of reference
       })
       // Match { "quxes": [<value>, <value>, <value>, <value>] }
-      ->pattern("/quxes\\.\\d+$/", function(Json\MatchedJson $matched $matched) {
+      ->pattern("/quxes\\.\\d+$/", function(Json\MatchedJson $matched) {
         return $matched
           ->ref("quxes");
       })
